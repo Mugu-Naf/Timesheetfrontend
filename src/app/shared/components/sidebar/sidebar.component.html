@@ -1,0 +1,84 @@
+<aside class="sidebar" [class.sidebar--collapsed]="collapsed()">
+
+  <!-- Brand -->
+  <div class="sidebar__brand">
+    <span class="sidebar__brand-icon">⏱</span>
+    @if (!collapsed()) {
+      <span class="sidebar__brand-text">TimeSheet Pro</span>
+    }
+  </div>
+
+  <!-- User pill -->
+  @if (!collapsed()) {
+    <div class="sidebar__user">
+      <div class="sidebar__avatar">{{ (auth.username() ?? 'U')[0].toUpperCase() }}</div>
+      <div class="sidebar__user-info">
+        <span class="sidebar__user-name">{{ auth.username() }}</span>
+        <span class="sidebar__user-role badge--role">{{ auth.role() }}</span>
+      </div>
+    </div>
+  }
+
+  <!-- Nav -->
+  <nav class="sidebar__nav">
+    @for (item of visibleItems(); track item.route) {
+      @if (item.children && item.children.length) {
+        <!-- Expandable group -->
+        <div class="nav-group">
+          <button
+            class="nav-item nav-item--group"
+            [class.nav-item--expanded]="expandedItem() === item.label"
+            (click)="toggleItem(item.label)"
+          >
+            <span class="nav-item__icon">{{ item.icon }}</span>
+            @if (!collapsed()) {
+              <span class="nav-item__label">{{ item.label }}</span>
+              <span class="nav-item__arrow" [class.nav-item__arrow--open]="expandedItem() === item.label">›</span>
+            }
+          </button>
+
+          @if (expandedItem() === item.label && !collapsed()) {
+            <div class="nav-children">
+              @for (child of item.children; track child.route) {
+                @if (auth.role() && child.roles.includes(auth.role()!)) {
+                  <a
+                    class="nav-child"
+                    [routerLink]="child.route"
+                    routerLinkActive="nav-child--active"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    (click)="onNavClick()"
+                  >{{ child.label }}</a>
+                }
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <!-- Simple link -->
+        <a
+          class="nav-item"
+          [routerLink]="item.route"
+          routerLinkActive="nav-item--active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          (click)="onNavClick()"
+        >
+          <span class="nav-item__icon">{{ item.icon }}</span>
+          @if (!collapsed()) {
+            <span class="nav-item__label">{{ item.label }}</span>
+          }
+        </a>
+      }
+    }
+  </nav>
+
+  <!-- Logout -->
+  <div class="sidebar__footer">
+    <button class="nav-item nav-item--logout" (click)="logout()">
+      <span class="nav-item__icon">🚪</span>
+      @if (!collapsed()) {
+        <span class="nav-item__label">Logout</span>
+      }
+    </button>
+  </div>
+
+</aside>

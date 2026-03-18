@@ -1,0 +1,114 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Review Leave Requests</h2>
+      <p class="page-sub">Approve or reject employee leave applications</p>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" placeholder="Search employee..."
+        [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
+    </div>
+    <div class="filter-tabs">
+      @for (s of statuses; track s) {
+        <button class="filter-tab" [class.filter-tab--active]="filterStatus() === s"
+          (click)="filterStatus.set(s)">{{ s }}</button>
+      }
+    </div>
+  </div>
+
+  <app-loader [show]="loading()" [inline]="true" />
+
+  @if (!loading()) {
+    @if (filtered().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state__icon">🏖️</div>
+        <h3>No leave requests found</h3>
+        <p>All requests have been reviewed.</p>
+      </div>
+    } @else {
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Type</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Days</th>
+                <th>Reason</th>
+                <th>Applied</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (lv of filtered(); track lv.leaveRequestId) {
+                <tr [class.row--pending]="lv.status === 'Pending'">
+                  <td>
+                    <div class="employee-cell">
+                      <div class="avatar">{{ lv.employeeName[0] }}</div>
+                      <strong>{{ lv.employeeName }}</strong>
+                    </div>
+                  </td>
+                  <td><span class="type-chip type-chip--{{ lv.leaveType.toLowerCase() }}">{{ lv.leaveType }}</span></td>
+                  <td>{{ lv.startDate | date:'dd MMM yyyy' }}</td>
+                  <td>{{ lv.endDate | date:'dd MMM yyyy' }}</td>
+                  <td><span class="days-pill">{{ getDays(lv.startDate, lv.endDate) }}d</span></td>
+                  <td class="td-reason">{{ lv.reason ?? '—' }}</td>
+                  <td>{{ lv.createdAt | date:'dd MMM' }}</td>
+                  <td><app-status-badge [status]="lv.status" /></td>
+                  <td>
+                    @if (lv.status === 'Pending') {
+                      <div class="action-btns">
+                        <button class="btn-approve" (click)="openModal(lv, 'approve')" [disabled]="actionLoading() === lv.leaveRequestId">✓</button>
+                        <button class="btn-reject"  (click)="openModal(lv, 'reject')"  [disabled]="actionLoading() === lv.leaveRequestId">✕</button>
+                      </div>
+                    } @else {
+                      <span class="reviewed-by">{{ lv.reviewedBy ?? '—' }}</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  }
+</div>
+
+@if (modalOpen()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header" [class.modal__header--approve]="modalAction() === 'approve'" [class.modal__header--reject]="modalAction() === 'reject'">
+        <span>{{ modalAction() === 'approve' ? '✅' : '❌' }}</span>
+        <h3>{{ modalAction() === 'approve' ? 'Approve' : 'Reject' }} Leave</h3>
+      </div>
+      <div class="modal__body">
+        @if (modalLeave()) {
+          <div class="modal__info">
+            <span><strong>Employee:</strong> {{ modalLeave()!.employeeName }}</span>
+            <span><strong>Type:</strong> {{ modalLeave()!.leaveType }}</span>
+            <span><strong>Duration:</strong> {{ getDays(modalLeave()!.startDate, modalLeave()!.endDate) }} day(s)</span>
+          </div>
+        }
+        <div class="form-group">
+          <label class="form-label">Comments <span class="hint">(optional)</span></label>
+          <textarea class="form-textarea" rows="3" placeholder="Add a note..."
+            [value]="modalComment()" (input)="modalComment.set($any($event.target).value)"></textarea>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn-outline" (click)="closeModal()">Cancel</button>
+        <button [class]="modalAction() === 'approve' ? 'btn-approve-lg' : 'btn-reject-lg'" (click)="confirmAction()">
+          Confirm {{ modalAction() === 'approve' ? 'Approval' : 'Rejection' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

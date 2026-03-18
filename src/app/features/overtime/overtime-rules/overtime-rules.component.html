@@ -1,0 +1,130 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Overtime Rules</h2>
+      <p class="page-sub">Configure overtime policies for your organisation</p>
+    </div>
+    @if (!showForm()) {
+      <button class="btn-primary" (click)="openNewForm()">+ New Rule</button>
+    }
+  </div>
+
+  <app-loader [show]="loading()" [inline]="true" />
+
+  <!-- Form panel -->
+  @if (showForm()) {
+    <div class="form-card">
+      <div class="form-card__header">
+        <h3>{{ editingId() ? 'Edit Rule' : 'New Overtime Rule' }}</h3>
+        <button class="btn-close" (click)="cancelForm()">✕</button>
+      </div>
+      <form class="form" (ngSubmit)="onSubmit()" novalidate>
+        <div class="form-row-2">
+          <div class="form-group form-group--full">
+            <label class="form-label">Rule Name <span class="required">*</span></label>
+            <input type="text" class="form-input" placeholder="e.g. Standard OT Policy"
+              [(ngModel)]="ruleName" name="ruleName" />
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Max Regular Hours/Day <span class="required">*</span></label>
+            <input type="number" class="form-input" min="0.5" max="24" step="0.5"
+              [(ngModel)]="maxRegularHours" name="maxRegularHours" />
+            <span class="form-hint">Hours before overtime kicks in (e.g. 8)</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Overtime Multiplier <span class="required">*</span></label>
+            <input type="number" class="form-input" min="1" max="5" step="0.1"
+              [(ngModel)]="overtimeMultiplier" name="overtimeMultiplier" />
+            <span class="form-hint">e.g. 1.5 = time-and-a-half</span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Effective From <span class="required">*</span></label>
+            <input type="date" class="form-input" [(ngModel)]="effectiveFrom" name="effectiveFrom" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Effective To <span class="hint">(optional)</span></label>
+            <input type="date" class="form-input" [(ngModel)]="effectiveTo" name="effectiveTo" />
+            <span class="form-hint">Leave blank for open-ended rules</span>
+          </div>
+        </div>
+
+        @if (editingId()) {
+          <div class="toggle-group">
+            <label class="toggle-label">
+              <div class="toggle-switch" [class.toggle-switch--on]="isActive()"
+                   (click)="isActive.update(v => !v)">
+                <div class="toggle-thumb"></div>
+              </div>
+              <span>{{ isActive() ? 'Active' : 'Inactive' }}</span>
+            </label>
+          </div>
+        }
+
+        @if (formError()) {
+          <div class="form-error-banner"><span>⚠️</span> {{ formError() }}</div>
+        }
+
+        <div class="form-actions">
+          <button type="button" class="btn-outline" (click)="cancelForm()">Cancel</button>
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            @if (saving()) { <span class="spinner"></span> Saving... }
+            @else { {{ editingId() ? 'Update Rule' : 'Create Rule' }} }
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (!loading()) {
+    @if (rules().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state__icon">⚙️</div>
+        <h3>No overtime rules configured</h3>
+        <p>Create your first overtime policy to get started.</p>
+        <button class="btn-primary" (click)="openNewForm()">Create Rule</button>
+      </div>
+    } @else {
+      <div class="rules-grid">
+        @for (rule of rules(); track rule.overtimeRuleId) {
+          <div class="rule-card" [class.rule-card--inactive]="!rule.isActive">
+            <div class="rule-card__header">
+              <h3 class="rule-card__name">{{ rule.ruleName }}</h3>
+              <span class="rule-status" [class.rule-status--active]="rule.isActive"
+                    [class.rule-status--inactive]="!rule.isActive">
+                {{ rule.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+            <div class="rule-stats">
+              <div class="rule-stat">
+                <span class="rule-stat__value">{{ rule.maxRegularHours }}h</span>
+                <span class="rule-stat__label">Regular Hours/Day</span>
+              </div>
+              <div class="rule-stat__divider">×</div>
+              <div class="rule-stat">
+                <span class="rule-stat__value">{{ rule.overtimeMultiplier }}x</span>
+                <span class="rule-stat__label">OT Multiplier</span>
+              </div>
+            </div>
+            <div class="rule-dates">
+              <span>📅 From {{ rule.effectiveFrom | date:'dd MMM yyyy' }}</span>
+              @if (rule.effectiveTo) {
+                <span>→ {{ rule.effectiveTo | date:'dd MMM yyyy' }}</span>
+              } @else {
+                <span class="ongoing">Open-ended</span>
+              }
+            </div>
+            <div class="rule-card__actions">
+              <button class="btn-edit" (click)="editRule(rule)">✏️ Edit</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

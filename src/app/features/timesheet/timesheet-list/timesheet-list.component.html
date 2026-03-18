@@ -1,0 +1,77 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">My Timesheets</h2>
+      <p class="page-sub">Track and manage your submitted hours</p>
+    </div>
+    <a routerLink="/timesheet/new" class="btn-primary">+ New Timesheet</a>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" placeholder="Search by project..."
+        [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
+    </div>
+    <div class="filter-tabs">
+      @for (s of statuses; track s) {
+        <button class="filter-tab" [class.filter-tab--active]="filterStatus() === s"
+          (click)="filterStatus.set(s)">{{ s }}</button>
+      }
+    </div>
+  </div>
+
+  <app-loader [show]="loading()" [inline]="true" />
+
+  @if (!loading()) {
+    @if (filtered().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state__icon">📋</div>
+        <h3>No timesheets found</h3>
+        <p>{{ filterStatus() !== 'All' ? 'Try a different filter.' : 'Submit your first timesheet to get started.' }}</p>
+        <a routerLink="/timesheet/new" class="btn-primary">Submit Timesheet</a>
+      </div>
+    } @else {
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Hours</th>
+                <th>Overtime</th>
+                <th>Project</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th>Comments</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (ts of filtered(); track ts.timesheetId) {
+                <tr>
+                  <td><strong>{{ ts.date | date:'dd MMM yyyy' }}</strong></td>
+                  <td><span class="hours-badge">{{ ts.hoursWorked }}h</span></td>
+                  <td>{{ ts.overtimeHours > 0 ? ts.overtimeHours + 'h' : '—' }}</td>
+                  <td>{{ ts.projectName ?? '—' }}</td>
+                  <td><app-status-badge [status]="ts.status" /></td>
+                  <td>{{ ts.submittedAt | date:'dd MMM' }}</td>
+                  <td class="td-comments">{{ ts.comments ?? '—' }}</td>
+                  <td>
+                    <div class="action-btns">
+                      @if (ts.status === 'Pending') {
+                        <a [routerLink]="['/timesheet/edit', ts.timesheetId]" class="btn-icon btn-icon--edit" title="Edit">✏️</a>
+                        <button class="btn-icon btn-icon--delete" (click)="delete(ts.timesheetId)" title="Delete">🗑️</button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  }
+</div>

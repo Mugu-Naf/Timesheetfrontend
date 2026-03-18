@@ -1,0 +1,79 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">My Leave Requests</h2>
+      <p class="page-sub">View and manage your leave applications</p>
+    </div>
+    <a routerLink="/leave/new" class="btn-primary">+ Apply Leave</a>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label class="filter-label">Status</label>
+      <div class="filter-tabs">
+        @for (s of statuses; track s) {
+          <button class="filter-tab" [class.filter-tab--active]="filterStatus() === s"
+            (click)="filterStatus.set(s)">{{ s }}</button>
+        }
+      </div>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Type</label>
+      <select class="filter-select" [value]="filterType()" (change)="filterType.set($any($event.target).value)">
+        @for (t of types; track t) {
+          <option [value]="t">{{ t }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <app-loader [show]="loading()" [inline]="true" />
+
+  @if (!loading()) {
+    @if (filtered().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state__icon">🏖️</div>
+        <h3>No leave requests found</h3>
+        <p>Apply for a leave to see it here.</p>
+        <a routerLink="/leave/new" class="btn-primary">Apply Leave</a>
+      </div>
+    } @else {
+      <div class="cards-grid">
+        @for (lv of filtered(); track lv.leaveRequestId) {
+          <div class="leave-card" [class.leave-card--pending]="lv.status === 'Pending'">
+            <div class="leave-card__header">
+              <span class="leave-type-badge leave-type--{{ lv.leaveType.toLowerCase() }}">
+                {{ lv.leaveType }}
+              </span>
+              <app-status-badge [status]="lv.status" />
+            </div>
+            <div class="leave-card__dates">
+              <div class="date-range">
+                <span class="date-label">From</span>
+                <span class="date-value">{{ lv.startDate | date:'dd MMM yyyy' }}</span>
+              </div>
+              <div class="date-arrow">→</div>
+              <div class="date-range">
+                <span class="date-label">To</span>
+                <span class="date-value">{{ lv.endDate | date:'dd MMM yyyy' }}</span>
+              </div>
+              <div class="days-pill">{{ getDays(lv.startDate, lv.endDate) }} day(s)</div>
+            </div>
+            @if (lv.reason) {
+              <p class="leave-card__reason">{{ lv.reason }}</p>
+            }
+            <div class="leave-card__footer">
+              <span class="leave-card__applied">Applied {{ lv.createdAt | date:'dd MMM' }}</span>
+              @if (lv.status === 'Pending') {
+                <button class="btn-cancel" (click)="cancel(lv.leaveRequestId)">Cancel</button>
+              }
+              @if (lv.reviewedBy) {
+                <span class="reviewed-by">Reviewed by {{ lv.reviewedBy }}</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

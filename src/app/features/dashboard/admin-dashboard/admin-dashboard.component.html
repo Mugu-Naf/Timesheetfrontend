@@ -1,0 +1,105 @@
+<div class="dashboard">
+  <app-loader [show]="loading()" [inline]="true" message="Loading dashboard..." />
+
+  @if (!loading()) {
+    <div class="greeting">
+      <div>
+        <h2 class="greeting__title">Admin Overview 📊</h2>
+        <p class="greeting__date">{{ auth.role() }} · {{ auth.username() }}</p>
+      </div>
+      <div class="header-actions">
+        <a routerLink="/timesheet/review" class="btn-outline">Review Timesheets</a>
+        <a routerLink="/leave/review" class="btn-primary">Review Leaves</a>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card stat-card--blue">
+        <div class="stat-card__icon">👥</div>
+        <div class="stat-card__content">
+          <span class="stat-card__value">{{ totalEmployees() }}</span>
+          <span class="stat-card__label">Total Employees</span>
+        </div>
+        <a routerLink="/employees" class="stat-card__action">View →</a>
+      </div>
+      <div class="stat-card stat-card--amber">
+        <div class="stat-card__icon">⏱️</div>
+        <div class="stat-card__content">
+          <span class="stat-card__value">{{ pendingTimesheets() }}</span>
+          <span class="stat-card__label">Pending Timesheets</span>
+        </div>
+        <a routerLink="/timesheet/review" class="stat-card__action">Review →</a>
+      </div>
+      <div class="stat-card stat-card--red">
+        <div class="stat-card__icon">🏖️</div>
+        <div class="stat-card__content">
+          <span class="stat-card__value">{{ pendingLeaves() }}</span>
+          <span class="stat-card__label">Pending Leaves</span>
+        </div>
+        <a routerLink="/leave/review" class="stat-card__action">Review →</a>
+      </div>
+      <div class="stat-card stat-card--green">
+        <div class="stat-card__icon">📁</div>
+        <div class="stat-card__content">
+          <span class="stat-card__value">{{ activeProjects() }}</span>
+          <span class="stat-card__label">Active Projects</span>
+        </div>
+        <a routerLink="/projects" class="stat-card__action">View →</a>
+      </div>
+    </div>
+
+    <div class="recent-grid">
+      <div class="card">
+        <div class="card__header">
+          <h3 class="card__title">⏱️ Pending Timesheets</h3>
+          <a routerLink="/timesheet/review" class="card__link">Review all →</a>
+        </div>
+        @if (recentTimesheets().length === 0) {
+          <div class="empty-state">No timesheets to review.</div>
+        } @else {
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>Employee</th><th>Date</th><th>Hours</th><th>Status</th></tr></thead>
+              <tbody>
+                @for (ts of recentTimesheets(); track ts.timesheetId) {
+                  <tr>
+                    <td><strong>{{ ts.employeeName }}</strong></td>
+                    <td>{{ ts.date | date:'dd MMM' }}</td>
+                    <td>{{ ts.hoursWorked }}h</td>
+                    <td><app-status-badge [status]="ts.status" /></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      <div class="card">
+        <div class="card__header">
+          <h3 class="card__title">🏖️ Pending Leaves</h3>
+          <a routerLink="/leave/review" class="card__link">Review all →</a>
+        </div>
+        @if (recentLeaves().length === 0) {
+          <div class="empty-state">No leave requests to review.</div>
+        } @else {
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>Employee</th><th>Type</th><th>From</th><th>Status</th></tr></thead>
+              <tbody>
+                @for (lv of recentLeaves(); track lv.leaveRequestId) {
+                  <tr>
+                    <td><strong>{{ lv.employeeName }}</strong></td>
+                    <td>{{ lv.leaveType }}</td>
+                    <td>{{ lv.startDate | date:'dd MMM' }}</td>
+                    <td><app-status-badge [status]="lv.status" /></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

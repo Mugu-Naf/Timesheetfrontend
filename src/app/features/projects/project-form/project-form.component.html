@@ -1,0 +1,86 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">{{ isEdit() ? 'Edit Project' : 'New Project' }}</h2>
+      <p class="page-sub">{{ isEdit() ? 'Update project details' : 'Create a new project for timesheet tracking' }}</p>
+    </div>
+    <a routerLink="/projects" class="btn-outline">← Back</a>
+  </div>
+
+  <app-loader [show]="loadingInit()" [inline]="true" />
+
+  @if (!loadingInit()) {
+    <div class="form-card">
+      <form class="form" (ngSubmit)="onSubmit()" novalidate>
+
+        <div class="form-group">
+          <label class="form-label">Project Name <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <span class="input-icon">📁</span>
+            <input type="text" class="form-input" placeholder="e.g. E-Commerce Platform"
+              [(ngModel)]="projectName" name="projectName" maxlength="100" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Client Name <span class="hint">(optional)</span></label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input type="text" class="form-input" placeholder="e.g. Acme Corp"
+              [(ngModel)]="clientName" name="clientName" maxlength="100" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description <span class="hint">(optional)</span></label>
+          <textarea class="form-textarea" rows="3" placeholder="Brief description of the project..."
+            [(ngModel)]="description" name="description" maxlength="500"></textarea>
+          <span class="form-hint">{{ description().length }}/500</span>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Start Date <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <span class="input-icon">📅</span>
+              <input type="date" class="form-input" [(ngModel)]="startDate" name="startDate" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Date <span class="hint">(optional)</span></label>
+            <div class="input-wrapper">
+              <span class="input-icon">📅</span>
+              <input type="date" class="form-input" [(ngModel)]="endDate" name="endDate" />
+            </div>
+            <span class="form-hint">Leave blank for ongoing projects</span>
+          </div>
+        </div>
+
+        @if (isEdit()) {
+          <div class="toggle-group">
+            <label class="toggle-label">
+              <div class="toggle-switch" [class.toggle-switch--on]="isActive()"
+                   (click)="isActive.update(v => !v)">
+                <div class="toggle-thumb"></div>
+              </div>
+              <span>{{ isActive() ? 'Active' : 'Inactive' }}</span>
+            </label>
+          </div>
+        }
+
+        @if (formError()) {
+          <div class="form-error-banner"><span>⚠️</span> {{ formError() }}</div>
+        }
+
+        <div class="form-actions">
+          <a routerLink="/projects" class="btn-outline">Cancel</a>
+          <button type="submit" class="btn-primary" [disabled]="loading()">
+            @if (loading()) { <span class="spinner"></span> Saving... }
+            @else { {{ isEdit() ? 'Update Project' : 'Create Project' }} }
+          </button>
+        </div>
+
+      </form>
+    </div>
+  }
+</div>

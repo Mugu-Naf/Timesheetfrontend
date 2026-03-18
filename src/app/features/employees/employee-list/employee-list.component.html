@@ -1,0 +1,65 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Employees</h2>
+      <p class="page-sub">{{ filtered().length }} of {{ employees().length }} employees</p>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" placeholder="Search name, email or username..."
+        [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
+    </div>
+    <div class="filter-group">
+      <select class="filter-select"
+        [value]="filterDept()" (change)="filterDept.set($any($event.target).value)">
+        @for (d of departments(); track d) {
+          <option [value]="d">{{ d === 'All' ? 'All Departments' : d }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <app-loader [show]="loading()" [inline]="true" />
+
+  @if (!loading()) {
+    @if (filtered().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state__icon">👥</div>
+        <h3>No employees found</h3>
+        <p>Try a different search or filter.</p>
+      </div>
+    } @else {
+      <div class="employees-grid">
+        @for (emp of filtered(); track emp.employeeId) {
+          <div class="emp-card">
+            <div class="emp-card__avatar" [style.background]="getAvatarColor(emp.employeeId)">
+              {{ getInitials(emp) }}
+            </div>
+            <div class="emp-card__info">
+              <h3 class="emp-card__name">{{ emp.firstName }} {{ emp.lastName }}</h3>
+              <span class="emp-card__title">{{ emp.jobTitle ?? 'Employee' }}</span>
+              <span class="emp-card__dept">{{ emp.department ?? '—' }}</span>
+            </div>
+            <div class="emp-card__meta">
+              <a class="meta-item" [href]="'mailto:' + emp.email">
+                <span>📧</span><span>{{ emp.email }}</span>
+              </a>
+              @if (emp.phone) {
+                <div class="meta-item"><span>📱</span><span>{{ emp.phone }}</span></div>
+              }
+              <div class="meta-item">
+                <span>👤</span><span>@{{ emp.username }}</span>
+              </div>
+            </div>
+            <div class="emp-card__footer">
+              <a [routerLink]="['/employees/profile', emp.employeeId]" class="btn-view">View Profile →</a>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

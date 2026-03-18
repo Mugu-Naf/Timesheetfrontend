@@ -1,0 +1,126 @@
+<div class="dashboard">
+  <app-loader [show]="loading()" [inline]="true" message="Loading dashboard..." />
+
+  @if (!loading()) {
+    <!-- Greeting -->
+    <div class="greeting">
+      <div>
+        <h2 class="greeting__title">Good {{ getGreeting() }}, {{ auth.username() }} 👋</h2>
+        <p class="greeting__date">{{ todayDate }}</p>
+      </div>
+      <a routerLink="/timesheet/new" class="btn-primary">+ Submit Timesheet</a>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stats-grid">
+      <div class="stat-card stat-card--blue">
+        <div class="stat-card__icon">⏱️</div>
+        <div class="stat-card__content">
+          <span class="stat-card__value">{{ pendingTimesheets() }}</span>
+          <span class="stat-card__label">Pending Timesheets</span>
+        </div>
+      </div>
+      <div class="stat-card stat-card--green">
+        <div class="stat-card__icon">✅</div>
+        <div class="stat-card__content">
+          <span class="stat-card__value">{{ approvedTimesheets() }}</span>
+          <span class="stat-card__label">Approved Timesheets</span>
+        </div>
+      </div>
+      <div class="stat-card stat-card--amber">
+        <div class="stat-card__icon">🏖️</div>
+        <div class="stat-card__content">
+          <span class="stat-card__value">{{ pendingLeaves() }}</span>
+          <span class="stat-card__label">Pending Leaves</span>
+        </div>
+      </div>
+      <div class="stat-card stat-card--purple">
+        <div class="stat-card__icon">📅</div>
+        <div class="stat-card__content">
+          <span class="stat-card__value stat-card__value--sm">{{ todayAttendance() }}</span>
+          <span class="stat-card__label">Today's Attendance</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h3 class="section-title">Quick Actions</h3>
+      <div class="action-grid">
+        <a routerLink="/timesheet/new" class="action-card">
+          <span class="action-card__icon">⏱️</span>
+          <span class="action-card__label">Submit Timesheet</span>
+        </a>
+        <a routerLink="/leave/new" class="action-card">
+          <span class="action-card__icon">📋</span>
+          <span class="action-card__label">Apply Leave</span>
+        </a>
+        <a routerLink="/attendance" class="action-card">
+          <span class="action-card__icon">📅</span>
+          <span class="action-card__label">Mark Attendance</span>
+        </a>
+        <a routerLink="/employees/profile" class="action-card">
+          <span class="action-card__icon">👤</span>
+          <span class="action-card__label">My Profile</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Recent activity -->
+    <div class="recent-grid">
+      <!-- Recent Timesheets -->
+      <div class="card">
+        <div class="card__header">
+          <h3 class="card__title">Recent Timesheets</h3>
+          <a routerLink="/timesheet" class="card__link">View all →</a>
+        </div>
+        @if (recentTimesheets().length === 0) {
+          <div class="empty-state">No timesheets yet. <a routerLink="/timesheet/new" class="link">Submit one →</a></div>
+        } @else {
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>Date</th><th>Hours</th><th>Project</th><th>Status</th></tr></thead>
+              <tbody>
+                @for (ts of recentTimesheets(); track ts.timesheetId) {
+                  <tr>
+                    <td>{{ ts.date | date:'dd MMM' }}</td>
+                    <td><strong>{{ ts.hoursWorked }}h</strong></td>
+                    <td>{{ ts.projectName ?? '—' }}</td>
+                    <td><app-status-badge [status]="ts.status" /></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      <!-- Recent Leaves -->
+      <div class="card">
+        <div class="card__header">
+          <h3 class="card__title">Recent Leaves</h3>
+          <a routerLink="/leave" class="card__link">View all →</a>
+        </div>
+        @if (recentLeaves().length === 0) {
+          <div class="empty-state">No leave requests yet. <a routerLink="/leave/new" class="link">Apply →</a></div>
+        } @else {
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>Type</th><th>From</th><th>To</th><th>Status</th></tr></thead>
+              <tbody>
+                @for (lv of recentLeaves(); track lv.leaveRequestId) {
+                  <tr>
+                    <td>{{ lv.leaveType }}</td>
+                    <td>{{ lv.startDate | date:'dd MMM' }}</td>
+                    <td>{{ lv.endDate | date:'dd MMM' }}</td>
+                    <td><app-status-badge [status]="lv.status" /></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

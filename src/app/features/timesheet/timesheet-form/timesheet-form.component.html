@@ -1,0 +1,70 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">{{ isEdit() ? 'Edit Timesheet' : 'Submit Timesheet' }}</h2>
+      <p class="page-sub">{{ isEdit() ? 'Update your timesheet entry' : 'Log your work hours for the day' }}</p>
+    </div>
+    <a routerLink="/timesheet" class="btn-outline">← Back</a>
+  </div>
+
+  <app-loader [show]="loadingInit()" [inline]="true" />
+
+  @if (!loadingInit()) {
+    <div class="form-card">
+      <form class="form" (ngSubmit)="onSubmit()" novalidate>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Date <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <span class="input-icon">📅</span>
+              <input type="date" class="form-input" [(ngModel)]="date" name="date" [disabled]="isEdit()" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hours Worked <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <span class="input-icon">⏱️</span>
+              <input type="number" class="form-input" placeholder="e.g. 8" min="0.25" max="24" step="0.25"
+                [(ngModel)]="hoursWorked" name="hoursWorked" />
+            </div>
+            <span class="form-hint">Min 0.25, Max 24 hours</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Project <span class="form-hint--inline">(optional)</span></label>
+          <div class="input-wrapper">
+            <span class="input-icon">📁</span>
+            <select class="form-input form-select" [(ngModel)]="projectId" name="projectId">
+              <option [value]="null">— No Project —</option>
+              @for (p of projects(); track p.projectId) {
+                <option [value]="p.projectId">{{ p.projectName }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Comments <span class="form-hint--inline">(optional)</span></label>
+          <textarea class="form-textarea" placeholder="Describe the work done today..."
+            rows="4" [(ngModel)]="comments" name="comments" maxlength="500"></textarea>
+          <span class="form-hint">{{ comments().length }}/500</span>
+        </div>
+
+        @if (formError()) {
+          <div class="form-error-banner"><span>⚠️</span> {{ formError() }}</div>
+        }
+
+        <div class="form-actions">
+          <a routerLink="/timesheet" class="btn-outline">Cancel</a>
+          <button type="submit" class="btn-primary" [disabled]="loading()">
+            @if (loading()) { <span class="spinner"></span> Saving... }
+            @else { {{ isEdit() ? 'Update Timesheet' : 'Submit Timesheet' }} }
+          </button>
+        </div>
+
+      </form>
+    </div>
+  }
+</div>

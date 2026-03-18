@@ -1,0 +1,77 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Projects</h2>
+      <p class="page-sub">View and manage all projects</p>
+    </div>
+    @if (auth.isAdmin()) {
+      <a routerLink="/projects/new" class="btn-primary">+ New Project</a>
+    }
+  </div>
+
+  <div class="filters">
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" placeholder="Search project or client..."
+        [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
+    </div>
+    <div class="filter-tabs">
+      @for (f of ['All','Active','Inactive']; track f) {
+        <button class="filter-tab" [class.filter-tab--active]="filterActive() === f"
+          (click)="filterActive.set(f)">{{ f }}</button>
+      }
+    </div>
+  </div>
+
+  <app-loader [show]="loading()" [inline]="true" />
+
+  @if (!loading()) {
+    @if (filtered().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state__icon">📁</div>
+        <h3>No projects found</h3>
+        <p>{{ auth.isAdmin() ? 'Create your first project.' : 'No projects available.' }}</p>
+        @if (auth.isAdmin()) {
+          <a routerLink="/projects/new" class="btn-primary">Create Project</a>
+        }
+      </div>
+    } @else {
+      <div class="projects-grid">
+        @for (p of filtered(); track p.projectId) {
+          <div class="project-card" [class.project-card--inactive]="!p.isActive">
+            <div class="project-card__header">
+              <div class="project-icon">📁</div>
+              <span class="project-status" [class.project-status--active]="p.isActive"
+                    [class.project-status--inactive]="!p.isActive">
+                {{ p.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+            <h3 class="project-card__name">{{ p.projectName }}</h3>
+            @if (p.clientName) {
+              <p class="project-card__client">👤 {{ p.clientName }}</p>
+            }
+            @if (p.description) {
+              <p class="project-card__desc">{{ p.description }}</p>
+            }
+            <div class="project-card__dates">
+              <span>🗓️ {{ p.startDate | date:'dd MMM yyyy' }}</span>
+              @if (p.endDate) {
+                <span>→ {{ p.endDate | date:'dd MMM yyyy' }}</span>
+              } @else {
+                <span class="ongoing">Ongoing</span>
+              }
+            </div>
+            @if (auth.isAdmin()) {
+              <div class="project-card__actions">
+                <a [routerLink]="['/projects/edit', p.projectId]" class="btn-edit">✏️ Edit</a>
+                @if (p.isActive) {
+                  <button class="btn-deactivate" (click)="deactivate(p.projectId)">⛔ Deactivate</button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

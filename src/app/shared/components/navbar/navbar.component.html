@@ -1,0 +1,21 @@
+<header class="navbar">
+  <div class="navbar__left">
+    <button class="navbar__toggle" (click)="onToggle()" title="Toggle sidebar">
+      <span></span><span></span><span></span>
+    </button>
+    <h1 class="navbar__title">{{ pageTitle() }}</h1>
+  </div>
+
+  <div class="navbar__right">
+    <div class="navbar__user">
+      <div class="navbar__avatar">{{ (auth.username() ?? 'U')[0].toUpperCase() }}</div>
+      <div class="navbar__user-info">
+        <span class="navbar__username">{{ auth.username() }}</span>
+        <span class="navbar__role">{{ auth.role() }}</span>
+      </div>
+    </div>
+    <button class="navbar__logout" (click)="auth.logout()" title="Logout">
+      🚪
+    </button>
+  </div>
+</header>

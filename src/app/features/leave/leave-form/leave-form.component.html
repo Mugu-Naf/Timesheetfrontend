@@ -1,0 +1,88 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Apply for Leave</h2>
+      <p class="page-sub">Submit a leave request for approval</p>
+    </div>
+    <a routerLink="/leave" class="btn-outline">← Back</a>
+  </div>
+
+  <div class="form-layout">
+    <div class="form-card">
+      <form class="form" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- Leave Type selector -->
+        <div class="form-group">
+          <label class="form-label">Leave Type <span class="required">*</span></label>
+          <div class="type-grid">
+            @for (t of leaveTypes; track t) {
+              <button type="button" class="type-option"
+                [class.type-option--active]="leaveType() === t"
+                (click)="leaveType.set(t)">
+                {{ t }}
+              </button>
+            }
+          </div>
+          @if (leaveType()) {
+            <p class="type-hint">{{ leaveTypeInfo[leaveType()] }}</p>
+          }
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Start Date <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <span class="input-icon">📅</span>
+              <input type="date" class="form-input" [(ngModel)]="startDate" name="startDate" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Date <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <span class="input-icon">📅</span>
+              <input type="date" class="form-input" [(ngModel)]="endDate" name="endDate" />
+            </div>
+          </div>
+        </div>
+
+        @if (getDays() > 0) {
+          <div class="days-summary">
+            <span class="days-summary__icon">📊</span>
+            <span>Total: <strong>{{ getDays() }} day(s)</strong> of {{ leaveType() }} leave</span>
+          </div>
+        }
+
+        <div class="form-group">
+          <label class="form-label">Reason <span class="form-hint--inline">(optional)</span></label>
+          <textarea class="form-textarea" rows="4" placeholder="Briefly explain the reason for your leave..."
+            [(ngModel)]="reason" name="reason" maxlength="500"></textarea>
+          <span class="form-hint">{{ reason().length }}/500</span>
+        </div>
+
+        @if (formError()) {
+          <div class="form-error-banner"><span>⚠️</span> {{ formError() }}</div>
+        }
+
+        <div class="form-actions">
+          <a routerLink="/leave" class="btn-outline">Cancel</a>
+          <button type="submit" class="btn-primary" [disabled]="loading()">
+            @if (loading()) { <span class="spinner"></span> Submitting... }
+            @else { Submit Leave Request }
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Info panel -->
+    <div class="info-panel">
+      <h3 class="info-panel__title">Leave Types</h3>
+      @for (t of leaveTypes; track t) {
+        <div class="info-item" [class.info-item--active]="leaveType() === t">
+          <strong>{{ t }}</strong>
+          <span>{{ leaveTypeInfo[t] }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</div>

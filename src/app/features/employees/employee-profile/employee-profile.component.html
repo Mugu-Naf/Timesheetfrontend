@@ -1,0 +1,103 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">{{ isOwnProfile() ? 'My Profile' : 'Employee Profile' }}</h2>
+      <p class="page-sub">{{ isOwnProfile() ? 'View and update your personal information' : 'View and edit employee details' }}</p>
+    </div>
+    @if (!isOwnProfile()) {
+      <a routerLink="/employees" class="btn-outline">← Back</a>
+    }
+  </div>
+
+  <app-loader [show]="loading()" [inline]="true" />
+
+  @if (!loading() && profile()) {
+    <div class="profile-layout">
+
+      <!-- Left: Avatar card -->
+      <div class="avatar-card">
+        <div class="profile-avatar">{{ getInitials() }}</div>
+        <h3 class="avatar-card__name">{{ profile()!.firstName }} {{ profile()!.lastName }}</h3>
+        <span class="avatar-card__title">{{ profile()!.jobTitle ?? 'Employee' }}</span>
+        <span class="avatar-card__dept">{{ profile()!.department ?? '—' }}</span>
+        <div class="avatar-card__meta">
+          <div class="meta-row"><span>👤</span><span>&#64;{{ profile()!.username }}</span></div>
+          <div class="meta-row"><span>📧</span><span>{{ profile()!.email }}</span></div>
+          @if (profile()!.phone) {
+            <div class="meta-row"><span>📱</span><span>{{ profile()!.phone }}</span></div>
+          }
+          <div class="meta-row"><span>📅</span><span>Joined {{ profile()!.dateOfJoining | date:'dd MMM yyyy' }}</span></div>
+        </div>
+        @if (!editing()) {
+          <button class="btn-edit-profile" (click)="startEdit()">✏️ Edit Profile</button>
+        }
+      </div>
+
+      <!-- Right: Edit form or view -->
+      <div class="details-card">
+        @if (!editing()) {
+          <div class="details-view">
+            <h3 class="section-heading">Personal Information</h3>
+            <div class="detail-grid">
+              <div class="detail-item"><span class="detail-label">First Name</span><span class="detail-value">{{ profile()!.firstName }}</span></div>
+              <div class="detail-item"><span class="detail-label">Last Name</span><span class="detail-value">{{ profile()!.lastName }}</span></div>
+              <div class="detail-item"><span class="detail-label">Email</span><span class="detail-value">{{ profile()!.email }}</span></div>
+              <div class="detail-item"><span class="detail-label">Phone</span><span class="detail-value">{{ profile()!.phone ?? '—' }}</span></div>
+              <div class="detail-item"><span class="detail-label">Department</span><span class="detail-value">{{ profile()!.department ?? '—' }}</span></div>
+              <div class="detail-item"><span class="detail-label">Job Title</span><span class="detail-value">{{ profile()!.jobTitle ?? '—' }}</span></div>
+              <div class="detail-item"><span class="detail-label">Username</span><span class="detail-value">{{ profile()!.username }}</span></div>
+              <div class="detail-item"><span class="detail-label">Date of Joining</span><span class="detail-value">{{ profile()!.dateOfJoining | date:'dd MMMM yyyy' }}</span></div>
+            </div>
+          </div>
+        } @else {
+          <form class="edit-form" (ngSubmit)="saveProfile()" novalidate>
+            <h3 class="section-heading">Edit Profile</h3>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">First Name <span class="required">*</span></label>
+                <input type="text" class="form-input" [(ngModel)]="firstName" name="firstName" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Last Name <span class="required">*</span></label>
+                <input type="text" class="form-input" [(ngModel)]="lastName" name="lastName" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email <span class="required">*</span></label>
+              <input type="email" class="form-input" [(ngModel)]="email" name="email" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input type="tel" class="form-input" placeholder="Optional" [(ngModel)]="phone" name="phone" />
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Department</label>
+                <select class="form-input form-select" [(ngModel)]="department" name="department">
+                  <option value="">— Select —</option>
+                  @for (d of departments; track d) {
+                    <option [value]="d">{{ d }}</option>
+                  }
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Job Title</label>
+                <input type="text" class="form-input" placeholder="e.g. Developer" [(ngModel)]="jobTitle" name="jobTitle" />
+              </div>
+            </div>
+            @if (formError()) {
+              <div class="form-error-banner"><span>⚠️</span> {{ formError() }}</div>
+            }
+            <div class="form-actions">
+              <button type="button" class="btn-outline" (click)="cancelEdit()">Cancel</button>
+              <button type="submit" class="btn-primary" [disabled]="saving()">
+                @if (saving()) { <span class="spinner"></span> Saving... }
+                @else { Save Changes }
+              </button>
+            </div>
+          </form>
+        }
+      </div>
+    </div>
+  }
+</div>
