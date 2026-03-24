@@ -6,7 +6,9 @@ import { Employee, EmployeeUpdateRequest } from '../models/employee.model';
 @Injectable({ providedIn: 'root' })
 export class EmployeeService {
   private http = inject(HttpClient);
-  private api  = `${environment.apiUrl}/api/Employee`;
+
+  // ✅ FIXED: removed duplicate /api
+  private api  = `${environment.apiUrl}/Employee`;
 
   readonly employees = signal<Employee[]>([]);
   readonly profile   = signal<Employee | null>(null);

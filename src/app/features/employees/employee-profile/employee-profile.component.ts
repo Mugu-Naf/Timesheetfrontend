@@ -2,6 +2,7 @@ import { Component, inject, signal, effect, model, OnInit } from '@angular/core'
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -21,12 +22,12 @@ export class EmployeeProfileComponent implements OnInit {
   private route        = inject(ActivatedRoute);
   protected auth       = inject(AuthService);
 
-  loading     = signal(true);
-  saving      = signal(false);
-  editing     = signal(false);
-  profile     = signal<Employee | null>(null);
+  loading      = signal(true);
+  saving       = signal(false);
+  editing      = signal(false);
+  profile      = signal<Employee | null>(null);
   isOwnProfile = signal(true);
-  formError   = signal('');
+  formError    = signal('');
 
   // Editable model signals
   firstName  = model('');
@@ -57,7 +58,7 @@ export class EmployeeProfileComponent implements OnInit {
   loadMyProfile() {
     this.loading.set(true);
     this.empService.getMyProfile().subscribe({
-      next: emp => { this.setProfile(emp); this.loading.set(false); },
+      next: (emp: Employee) => { this.setProfile(emp); this.loading.set(false); },
       error: () => { this.loading.set(false); this.toastService.error('Failed to load profile.'); }
     });
   }
@@ -65,7 +66,7 @@ export class EmployeeProfileComponent implements OnInit {
   loadById(id: number) {
     this.loading.set(true);
     this.empService.getById(id).subscribe({
-      next: emp => { this.setProfile(emp); this.loading.set(false); },
+      next: (emp: Employee) => { this.setProfile(emp); this.loading.set(false); },
       error: () => { this.loading.set(false); this.toastService.error('Failed to load employee.'); }
     });
   }
@@ -114,16 +115,16 @@ export class EmployeeProfileComponent implements OnInit {
 
     const req = this.isOwnProfile()
       ? this.empService.updateMyProfile(payload)
-      : this.empService.updateProfile(this.profile()!.employeeId, payload);
+      : this.empService.updateById(this.profile()!.employeeId, payload);
 
     req.subscribe({
-      next: updated => {
+      next: (updated: Employee) => {
         this.setProfile(updated);
         this.saving.set(false);
         this.editing.set(false);
         this.toastService.success('Profile updated successfully!');
       },
-      error: err => {
+      error: (err: HttpErrorResponse) => {
         this.saving.set(false);
         const msg = err?.error?.message ?? 'Failed to update profile.';
         this.formError.set(msg);

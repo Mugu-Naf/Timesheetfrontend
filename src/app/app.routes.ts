@@ -2,215 +2,173 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
+// Direct imports (NO lazy loading)
+import { LoginComponent } from './features/auth/login/login.component';
+import { RegisterComponent } from './features/auth/register/register.component';
+import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
+
+import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
+
+import { EmployeeDashboardComponent } from './features/dashboard/employee-dashboard/employee-dashboard.component';
+import { AdminDashboardComponent } from './features/dashboard/admin-dashboard/admin-dashboard.component';
+
+import { TimesheetListComponent } from './features/timesheet/timesheet-list/timesheet-list.component';
+import { TimesheetFormComponent } from './features/timesheet/timesheet-form/timesheet-form.component';
+import { TimesheetReviewComponent } from './features/timesheet/timesheet-review/timesheet-review.component';
+
+import { LeaveListComponent } from './features/leave/leave-list/leave-list.component';
+import { LeaveFormComponent } from './features/leave/leave-form/leave-form.component';
+import { LeaveReviewComponent } from './features/leave/leave-review/leave-review.component';
+
+import { AttendanceCheckinComponent } from './features/attendance/attendance-checkin/attendance-checkin.component';
+import { AttendanceReportComponent } from './features/attendance/attendance-report/attendance-report.component';
+
+import { ProjectListComponent } from './features/projects/project-list/project-list.component';
+import { ProjectFormComponent } from './features/projects/project-form/project-form.component';
+
+import { EmployeeListComponent } from './features/employees/employee-list/employee-list.component';
+import { EmployeeProfileComponent } from './features/employees/employee-profile/employee-profile.component';
+
+import { OvertimeRulesComponent } from './features/overtime/overtime-rules/overtime-rules.component';
+import { NotFoundComponent } from './features/not-found/not-found.component';
+
+
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
-  {
-    path: 'login',
-    loadComponent: () =>
-      import('./features/auth/login/login.component').then(m => m.LoginComponent)
-  },
-  {
-    path: 'register',
-    loadComponent: () =>
-      import('./features/auth/register/register.component').then(m => m.RegisterComponent)
-  },
-  {
-    path: 'forgot-password',
-    loadComponent: () =>
-      import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
-  },
+  // ✅ AUTH
+  { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
 
+  // ✅ DASHBOARD (Layout + children)
   {
     path: 'dashboard',
+    component: MainLayoutComponent,
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
     children: [
       {
         path: 'employee',
+        component: EmployeeDashboardComponent,
         canActivate: [roleGuard],
-        data: { roles: ['Employee', 'HR', 'Admin'] },
-        loadComponent: () =>
-          import('./features/dashboard/employee-dashboard/employee-dashboard.component')
-            .then(m => m.EmployeeDashboardComponent)
+        data: { roles: ['Employee', 'HR', 'Admin'] }
       },
       {
         path: 'admin',
+        component: AdminDashboardComponent,
         canActivate: [roleGuard],
-        data: { roles: ['HR', 'Admin'] },
-        loadComponent: () =>
-          import('./features/dashboard/admin-dashboard/admin-dashboard.component')
-            .then(m => m.AdminDashboardComponent)
+        data: { roles: ['HR', 'Admin'] }
       },
       { path: '', redirectTo: 'employee', pathMatch: 'full' }
     ]
   },
 
+  // ✅ TIMESHEET
   {
     path: 'timesheet',
+    component: MainLayoutComponent,
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
     children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/timesheet/timesheet-list/timesheet-list.component')
-            .then(m => m.TimesheetListComponent)
-      },
-      {
-        path: 'new',
-        loadComponent: () =>
-          import('./features/timesheet/timesheet-form/timesheet-form.component')
-            .then(m => m.TimesheetFormComponent)
-      },
-      {
-        path: 'edit/:id',
-        loadComponent: () =>
-          import('./features/timesheet/timesheet-form/timesheet-form.component')
-            .then(m => m.TimesheetFormComponent)
-      },
+      { path: '', component: TimesheetListComponent },
+      { path: 'new', component: TimesheetFormComponent },
+      { path: 'edit/:id', component: TimesheetFormComponent },
       {
         path: 'review',
+        component: TimesheetReviewComponent,
         canActivate: [roleGuard],
-        data: { roles: ['HR', 'Admin'] },
-        loadComponent: () =>
-          import('./features/timesheet/timesheet-review/timesheet-review.component')
-            .then(m => m.TimesheetReviewComponent)
+        data: { roles: ['HR', 'Admin'] }
       }
     ]
   },
 
+  // ✅ LEAVE
   {
     path: 'leave',
+    component: MainLayoutComponent,
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
     children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/leave/leave-list/leave-list.component')
-            .then(m => m.LeaveListComponent)
-      },
-      {
-        path: 'new',
-        loadComponent: () =>
-          import('./features/leave/leave-form/leave-form.component')
-            .then(m => m.LeaveFormComponent)
-      },
+      { path: '', component: LeaveListComponent },
+      { path: 'new', component: LeaveFormComponent },
       {
         path: 'review',
+        component: LeaveReviewComponent,
         canActivate: [roleGuard],
-        data: { roles: ['HR', 'Admin'] },
-        loadComponent: () =>
-          import('./features/leave/leave-review/leave-review.component')
-            .then(m => m.LeaveReviewComponent)
+        data: { roles: ['HR', 'Admin'] }
       }
     ]
   },
 
+  // ✅ ATTENDANCE
   {
     path: 'attendance',
+    component: MainLayoutComponent,
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
     children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/attendance/attendance-checkin/attendance-checkin.component')
-            .then(m => m.AttendanceCheckinComponent)
-      },
+      { path: '', component: AttendanceCheckinComponent },
       {
         path: 'report',
+        component: AttendanceReportComponent,
         canActivate: [roleGuard],
-        data: { roles: ['HR', 'Admin'] },
-        loadComponent: () =>
-          import('./features/attendance/attendance-report/attendance-report.component')
-            .then(m => m.AttendanceReportComponent)
+        data: { roles: ['HR', 'Admin'] }
       }
     ]
   },
 
+  // ✅ PROJECTS
   {
     path: 'projects',
+    component: MainLayoutComponent,
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
     children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/projects/project-list/project-list.component')
-            .then(m => m.ProjectListComponent)
-      },
+      { path: '', component: ProjectListComponent },
       {
         path: 'new',
+        component: ProjectFormComponent,
         canActivate: [roleGuard],
-        data: { roles: ['Admin'] },
-        loadComponent: () =>
-          import('./features/projects/project-form/project-form.component')
-            .then(m => m.ProjectFormComponent)
+        data: { roles: ['Admin'] }
       },
       {
         path: 'edit/:id',
+        component: ProjectFormComponent,
         canActivate: [roleGuard],
-        data: { roles: ['Admin'] },
-        loadComponent: () =>
-          import('./features/projects/project-form/project-form.component')
-            .then(m => m.ProjectFormComponent)
+        data: { roles: ['Admin'] }
       }
     ]
   },
 
+  // ✅ EMPLOYEES
   {
     path: 'employees',
+    component: MainLayoutComponent,
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
     children: [
       {
         path: '',
+        component: EmployeeListComponent,
         canActivate: [roleGuard],
-        data: { roles: ['HR', 'Admin'] },
-        loadComponent: () =>
-          import('./features/employees/employee-list/employee-list.component')
-            .then(m => m.EmployeeListComponent)
+        data: { roles: ['HR', 'Admin'] }
       },
-      {
-        path: 'profile',
-        loadComponent: () =>
-          import('./features/employees/employee-profile/employee-profile.component')
-            .then(m => m.EmployeeProfileComponent)
-      },
+      { path: 'profile', component: EmployeeProfileComponent },
       {
         path: 'profile/:id',
+        component: EmployeeProfileComponent,
         canActivate: [roleGuard],
-        data: { roles: ['HR', 'Admin'] },
-        loadComponent: () =>
-          import('./features/employees/employee-profile/employee-profile.component')
-            .then(m => m.EmployeeProfileComponent)
+        data: { roles: ['HR', 'Admin'] }
       }
     ]
   },
 
+  // ✅ OVERTIME
   {
     path: 'overtime',
+    component: MainLayoutComponent,
     canActivate: [authGuard, roleGuard],
     data: { roles: ['Admin'] },
-    loadComponent: () =>
-      import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
     children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/overtime/overtime-rules/overtime-rules.component')
-            .then(m => m.OvertimeRulesComponent)
-      }
+      { path: '', component: OvertimeRulesComponent }
     ]
   },
 
-  { path: '**', redirectTo: 'login' }
+  { path: '**', component: NotFoundComponent }
 ];
+``

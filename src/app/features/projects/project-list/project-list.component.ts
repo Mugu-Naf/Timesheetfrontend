@@ -20,21 +20,33 @@ export class ProjectListComponent implements OnInit {
   private toastService = inject(ToastService);
   protected auth       = inject(AuthService);
 
-  loading     = signal(true);
-  projects    = signal<Project[]>([]);
+  loading      = signal(true);
+  projects     = signal<Project[]>([]);
   filterActive = signal<string>('All');
   searchQuery  = signal('');
 
   filtered = computed(() => {
     let list = this.projects();
-    if (this.filterActive() === 'Active')   list = list.filter(p => p.isActive);
-    if (this.filterActive() === 'Inactive') list = list.filter(p => !p.isActive);
+
+    if (this.filterActive() === 'Active')
+      list = list.filter(p => p.isActive);
+
+    if (this.filterActive() === 'Inactive')
+      list = list.filter(p => !p.isActive);
+
     const q = this.searchQuery().toLowerCase();
-    if (q) list = list.filter(p => p.projectName.toLowerCase().includes(q) || (p.clientName ?? '').toLowerCase().includes(q));
+    if (q)
+      list = list.filter(p =>
+        p.projectName.toLowerCase().includes(q) ||
+        (p.clientName ?? '').toLowerCase().includes(q)
+      );
+
     return list;
   });
 
-  ngOnInit() { this.load(); }
+  ngOnInit() {
+    this.load();
+  }
 
   load() {
     this.loading.set(true);
@@ -43,15 +55,5 @@ export class ProjectListComponent implements OnInit {
       error: () => { this.loading.set(false); this.toastService.error('Failed to load projects.'); }
     });
   }
-
-  deactivate(id: number) {
-    if (!confirm('Deactivate this project?')) return;
-    this.projService.deactivate(id).subscribe({
-      next: updated => {
-        this.projects.update(list => list.map(p => p.projectId === id ? updated : p));
-        this.toastService.success('Project deactivated.');
-      },
-      error: () => this.toastService.error('Failed to deactivate project.')
-    });
-  }
 }
+``

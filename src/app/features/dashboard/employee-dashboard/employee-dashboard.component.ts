@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -28,16 +28,12 @@ export class EmployeeDashboardComponent implements OnInit {
   todayAttendance    = signal('Not Checked In');
   recentTimesheets   = signal<any[]>([]);
   recentLeaves       = signal<any[]>([]);
-  todayDate = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  todayDate = new Date().toLocaleDateString('en-IN', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
 
   ngOnInit() { this.loadDashboard(); }
-
-  getGreeting(): string {
-    const h = new Date().getHours();
-    if (h < 12) return 'Morning';
-    if (h < 17) return 'Afternoon';
-    return 'Evening';
-  }
 
   loadDashboard() {
     this.loading.set(true);
@@ -67,14 +63,19 @@ export class EmployeeDashboardComponent implements OnInit {
       next: att => {
         const today = new Date().toDateString();
         const rec = att.find((a: any) => new Date(a.date).toDateString() === today);
-        if (rec) {
-          if (rec.checkInTime && rec.checkOutTime) this.todayAttendance.set('Checked Out');
-          else if (rec.checkInTime) this.todayAttendance.set('Checked In');
-          else this.todayAttendance.set(rec.status);
-        }
+        if (rec?.checkOutTime) this.todayAttendance.set('Checked Out');
+        else if (rec?.checkInTime) this.todayAttendance.set('Checked In');
+        else this.todayAttendance.set('Not Checked In');
         check();
       },
       error: () => check()
     });
+  }
+
+  getGreeting(): string {
+    const h = new Date().getHours();
+    if (h < 12) return 'Morning';
+    if (h < 17) return 'Afternoon';
+    return 'Evening';
   }
 }

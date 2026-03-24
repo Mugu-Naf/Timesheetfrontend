@@ -6,29 +6,38 @@ import { Project, ProjectCreateRequest, ProjectUpdateRequest } from '../models/p
 @Injectable({ providedIn: 'root' })
 export class ProjectService {
   private http = inject(HttpClient);
-  private api  = `${environment.apiUrl}/projects`;
+
+  // ✅ FIXED — backend uses /Project (singular, capital P)
+  // ✅ environment already contains /api
+  private api  = `${environment.apiUrl}/Project`;
 
   readonly projects = signal<Project[]>([]);
   readonly loading  = signal(false);
   readonly error    = signal<string | null>(null);
 
+  // ✅ GET /api/Project
   getAll() {
     return this.http.get<Project[]>(this.api);
   }
 
+  // ✅ GET /api/Project/{id}
   getById(id: number) {
     return this.http.get<Project>(`${this.api}/${id}`);
   }
 
+  // ✅ POST /api/Project
   create(data: ProjectCreateRequest) {
     return this.http.post<Project>(this.api, data);
   }
 
+  // ✅ PUT /api/Project/{id}
   update(id: number, data: ProjectUpdateRequest) {
     return this.http.put<Project>(`${this.api}/${id}`, data);
   }
 
-  deactivate(id: number) {
-    return this.http.patch<Project>(`${this.api}/${id}/deactivate`, {});
+  // ✅ GET /api/Project/active
+  getActive() {
+    return this.http.get<Project[]>(`${this.api}/active`);
   }
 }
+``

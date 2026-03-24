@@ -18,7 +18,6 @@ const PAGE_TITLES: Record<string, string> = {
   '/attendance/report':  'Attendance Report',
   '/projects':           'Projects',
   '/projects/new':       'New Project',
-  '/employees':          'Employees',
   '/employees/profile':  'My Profile',
   '/overtime':           'Overtime Rules'
 };
