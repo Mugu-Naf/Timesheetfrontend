@@ -1,82 +1,82 @@
-<div class="auth-wrapper">
+<div class="auth-page">
 
-  <!-- Left panel -->
-  <div class="auth-panel">
-    <div class="auth-panel__content">
-      <div class="auth-panel__logo">⏱</div>
-      <h1 class="auth-panel__title">TimeSheet Pro</h1>
-      <p class="auth-panel__subtitle">Manage your time. Track every hour. Stay in control.</p>
-      <div class="auth-panel__features">
-        <div class="feature-item"><span>✅</span>Timesheet Submission & Approval</div>
-        <div class="feature-item"><span>📅</span>Leave Management</div>
-        <div class="feature-item"><span>🕐</span>Attendance Tracking</div>
-        <div class="feature-item"><span>📊</span>Project-wise Reports</div>
-      </div>
-    </div>
+  <!-- Brand bar -->
+  <div class="auth-brand">
+    <span class="auth-brand__icon">⏱</span>
+    <span class="auth-brand__name">Timesheet Management</span>
   </div>
 
-  <!-- Right form -->
-  <div class="auth-form-wrapper">
+  <!-- Center card -->
+  <div class="auth-center">
     <div class="auth-card">
-      <div class="auth-card__header">
-        <h2>Welcome Back</h2>
-        <p>Sign in to your account to continue</p>
+
+      <div class="auth-card__top">
+        <div class="auth-card__avatar">TM</div>
+        <h1 class="auth-card__title">Welcome back</h1>
+        <p class="auth-card__sub">Sign in to your account</p>
       </div>
 
       <form class="auth-form" (ngSubmit)="onSubmit()" novalidate>
 
         <div class="form-group">
           <label class="form-label" for="username">Username</label>
-          <div class="input-wrapper">
-            <span class="input-icon">👤</span>
-            <input id="username" type="text" class="form-input"
-              placeholder="Enter your username"
-              [(ngModel)]="username" name="username"
-              autocomplete="username" [disabled]="loading()" />
-          </div>
+          <input id="username" type="text" class="form-input"
+            placeholder="Enter your username"
+            [(ngModel)]="username" name="username"
+            autocomplete="username" [disabled]="loading()" />
         </div>
 
         <div class="form-group">
           <label class="form-label" for="password">Password</label>
-          <div class="input-wrapper">
-            <span class="input-icon">🔒</span>
+          <div class="input-pw">
             <input id="password" [type]="showPassword() ? 'text' : 'password'"
-              class="form-input form-input--with-toggle"
+              class="form-input"
               placeholder="Enter your password"
               [(ngModel)]="password" name="password"
               autocomplete="current-password" [disabled]="loading()" />
-            <button type="button" class="password-toggle" (click)="togglePassword()">
+            <button type="button" class="pw-toggle" (click)="togglePassword()">
               {{ showPassword() ? '🙈' : '👁️' }}
             </button>
           </div>
         </div>
 
-        <div class="form-row">
-          <label class="checkbox-label">
+        <div class="form-meta">
+          <label class="check-label">
             <input type="checkbox" [checked]="rememberMe()"
               (change)="rememberMe.set($any($event.target).checked)" />
             <span>Remember me</span>
           </label>
-          <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
+          <a routerLink="/forgot-password" class="meta-link">Forgot password?</a>
         </div>
 
         @if (formError()) {
-          <div class="form-error-banner"><span>⚠️</span> {{ formError() }}</div>
+          <div class="form-error-banner">⚠️ {{ formError() }}</div>
         }
 
-        <button type="submit" class="btn-primary" [disabled]="loading()">
+        <button type="submit" class="btn-submit" [disabled]="loading()">
           @if (loading()) {
             <span class="spinner"></span> Signing in...
           } @else {
-            Sign In →
+            Sign In
           }
         </button>
 
-        <p class="auth-card__footer">
-          Don't have an account? <a routerLink="/register" class="link">Create one</a>
-        </p>
-
       </form>
+
+      <p class="auth-card__footer">
+        Don't have an account?
+        <a routerLink="/register" class="footer-link">Create one</a>
+      </p>
+
+    </div>
+
+    <!-- Feature pills below card -->
+    <div class="auth-features">
+      <span class="feat-pill">✅ Timesheets</span>
+      <span class="feat-pill">📅 Leave</span>
+      <span class="feat-pill">🕐 Attendance</span>
+      <span class="feat-pill">📊 Reports</span>
     </div>
   </div>
+
 </div>

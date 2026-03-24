@@ -2,12 +2,12 @@
   display: flex;
   height: 100vh;
   overflow: hidden;
-  background: #f0f4f8;
+  background: var(--bg);
 }
 
 .layout__overlay {
   position: fixed; inset: 0;
-  background: rgba(15,23,42,0.2);
+  background: rgba(0,0,0,0.18);
   z-index: 199;
   display: none;
 }
@@ -28,7 +28,7 @@
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
-  background: #f0f4f8;
+  background: var(--bg);
 }
 
 .layout__content {
