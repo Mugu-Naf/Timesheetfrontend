@@ -95,3 +95,13 @@ export class ProjectFormComponent implements OnInit {
         this.loading.set(false);
         this.toastService.success(this.isEdit() ? 'Project updated!' : 'Project created!');
         this.router.navigate(['/projects']);
+      },
+      error: err => {
+        this.loading.set(false);
+        const msg = err?.error?.message ?? 'Failed to save project.';
+        this.formError.set(msg);
+        this.toastService.error(msg);
+      }
+    });
+  }
+}
