@@ -71,6 +71,19 @@ export class LeaveFormComponent implements OnInit {
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)) + 1);
   }
 
+  // Returns a warning message if selected days exceed balance, null otherwise
+  getBalanceWarning(): string | null {
+    const type = this.leaveType();
+    const days = this.getDays();
+    if (days === 0 || type === 'Unpaid') return null;
+    const remaining = this.getRemaining(type);
+    if (remaining === null) return null;
+    if (days > remaining) {
+      return `You are selecting ${days} day(s) but only ${remaining} day(s) of ${type} leave remaining.`;
+    }
+    return null;
+  }
+
   onSubmit() {
     if (!this.leaveType() || !this.startDate() || !this.endDate()) {
       this.formError.set('Please fill all required fields.');

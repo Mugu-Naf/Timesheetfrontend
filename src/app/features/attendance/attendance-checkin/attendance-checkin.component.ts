@@ -20,30 +20,32 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
   loading       = signal(true);
   actionLoading = signal(false);
   attendance    = signal<Attendance[]>([]);
-  todayRecord   = signal<Attendance | null>(null);
   currentTime   = signal(new Date());
 
   todayStr = new Date().toLocaleDateString('en-IN', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
 
-  // Today's date string for comparison
-  private todayDate = new Date().toDateString();
+  // Computed so it always reflects the current day (even past midnight)
+  todayRecord = computed(() => {
+    const todayStr = this.currentTime().toDateString();
+    return this.attendance().find(a => new Date(a.date).toDateString() === todayStr) ?? null;
+  });
 
   isCheckedIn  = computed(() => !!this.todayRecord()?.checkInTime);
   isCheckedOut = computed(() => !!this.todayRecord()?.checkOutTime);
 
   // Detect if there's a previous day record with check-in but no check-out
   forgotCheckout = computed(() => {
+    const todayStr = this.currentTime().toDateString();
     return this.attendance().find(a => {
-      const recDate = new Date(a.date).toDateString();
-      return recDate !== this.todayDate && a.checkInTime && !a.checkOutTime;
+      return new Date(a.date).toDateString() !== todayStr && a.checkInTime && !a.checkOutTime;
     }) ?? null;
   });
 
-  // Summary stats
-  totalPresent  = computed(() => this.attendance().filter(a => a.status === 'Present').length);
-  totalHalfDay  = computed(() => this.attendance().filter(a => a.status === 'HalfDay').length);
+  // Summary stats — based on actual check-in records
+  totalPresent  = computed(() => this.attendance().filter(a => a.checkInTime && a.status === 'Present').length);
+  totalHalfDay  = computed(() => this.attendance().filter(a => a.checkInTime && a.status === 'HalfDay').length);
   totalLeave    = computed(() => this.attendance().filter(a => a.status === 'Leave').length);
   totalAbsent   = computed(() => this.attendance().filter(a => a.status === 'Absent').length);
 
@@ -64,7 +66,6 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
           new Date(b.date).getTime() - new Date(a.date).getTime()
         );
         this.attendance.set(sorted);
-        this.todayRecord.set(att.find(a => new Date(a.date).toDateString() === this.todayDate) ?? null);
         this.loading.set(false);
       },
       error: () => {
@@ -78,7 +79,6 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
     this.actionLoading.set(true);
     this.attService.checkIn({ checkInTime: new Date().toISOString() }).subscribe({
       next: rec => {
-        this.todayRecord.set(rec);
         this.attendance.update(list => [rec, ...list.filter(a => a.attendanceId !== rec.attendanceId)]);
         this.actionLoading.set(false);
         this.toastService.success('Checked in successfully!');
@@ -94,7 +94,6 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
     this.actionLoading.set(true);
     this.attService.checkOut({ checkOutTime: new Date().toISOString() }).subscribe({
       next: rec => {
-        this.todayRecord.set(rec);
         this.attendance.update(list => list.map(a => a.attendanceId === rec.attendanceId ? rec : a));
         this.actionLoading.set(false);
         this.toastService.success('Checked out successfully!');
