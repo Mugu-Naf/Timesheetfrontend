@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { LeaveRequest, LeaveCreateRequest } from '../models/leave.model';
+import { LeaveRequest, LeaveCreateRequest, LeaveBalance } from '../models/leave.model';
 
 @Injectable({ providedIn: 'root' })
 export class LeaveService {
@@ -34,5 +34,9 @@ export class LeaveService {
 
   reject(id: number, comments?: string) {
     return this.http.put<LeaveRequest>(`${this.api}/${id}/reject`, { comments });
+  }
+
+  getMyBalance() {
+    return this.http.get<LeaveBalance>(`${this.api}/balance`);
   }
 }

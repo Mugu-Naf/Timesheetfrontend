@@ -6,7 +6,7 @@ import { LeaveService } from '../../../core/services/leave.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { LoaderComponent } from '../../../shared/components/loader/loader.component';
-import { LeaveRequest } from '../../../core/models/leave.model';
+import { LeaveRequest, LeaveBalance } from '../../../core/models/leave.model';
 
 @Component({
   selector: 'app-leave-list',
@@ -21,6 +21,7 @@ export class LeaveListComponent implements OnInit {
 
   loading      = signal(true);
   leaves       = signal<LeaveRequest[]>([]);
+  balance      = signal<LeaveBalance | null>(null);
   filterStatus = signal('All');
   filterType   = signal('All');
 
@@ -41,6 +42,10 @@ export class LeaveListComponent implements OnInit {
     this.leaveService.getMyLeaves().subscribe({
       next: lv => { this.leaves.set(lv); this.loading.set(false); },
       error: () => { this.loading.set(false); this.toastService.error('Failed to load leaves.'); }
+    });
+    this.leaveService.getMyBalance().subscribe({
+      next: b => this.balance.set(b),
+      error: () => {}
     });
   }
 

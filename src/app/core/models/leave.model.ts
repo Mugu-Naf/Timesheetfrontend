@@ -21,3 +21,22 @@ export interface LeaveCreateRequest {
   endDate: string;
   reason?: string;
 }
+
+export interface LeaveBalance {
+  year: number;
+  casualTotal: number;
+  casualUsed: number;
+  casualRemaining: number;
+  sickTotal: number;
+  sickUsed: number;
+  sickRemaining: number;
+  earnedTotal: number;
+  earnedUsed: number;
+  earnedRemaining: number;
+  maternityTotal: number;
+  maternityUsed: number;
+  maternityRemaining: number;
+  paternityTotal: number;
+  paternityUsed: number;
+  paternityRemaining: number;
+}

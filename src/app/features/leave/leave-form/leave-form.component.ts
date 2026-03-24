@@ -1,10 +1,10 @@
-import { Component, inject, signal, effect, model } from '@angular/core';
+import { Component, inject, signal, effect, model, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LeaveService } from '../../../core/services/leave.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { LeaveType } from '../../../core/models/leave.model';
+import { LeaveType, LeaveBalance } from '../../../core/models/leave.model';
 
 @Component({
   selector: 'app-leave-form',
@@ -13,7 +13,7 @@ import { LeaveType } from '../../../core/models/leave.model';
   templateUrl: './leave-form.component.html',
   styleUrls: ['./leave-form.component.css']
 })
-export class LeaveFormComponent {
+export class LeaveFormComponent implements OnInit {
   private leaveService = inject(LeaveService);
   private toastService = inject(ToastService);
   private router       = inject(Router);
@@ -24,6 +24,10 @@ export class LeaveFormComponent {
   reason     = model('');
   loading    = signal(false);
   formError  = signal('');
+  balance    = signal<LeaveBalance | null>(null);
+
+  // Today's date in yyyy-MM-dd format for [min] attribute
+  minDate = new Date().toISOString().split('T')[0];
 
   leaveTypes: LeaveType[] = ['Casual', 'Sick', 'Earned', 'Maternity', 'Paternity', 'Unpaid'];
 
@@ -41,6 +45,26 @@ export class LeaveFormComponent {
     this.formError.set('');
   });
 
+  ngOnInit() {
+    this.leaveService.getMyBalance().subscribe({
+      next: b => this.balance.set(b),
+      error: () => {} // silently fail — balance is optional display
+    });
+  }
+
+  getRemaining(type: LeaveType): number | null {
+    const b = this.balance();
+    if (!b) return null;
+    switch (type) {
+      case 'Casual':    return b.casualRemaining;
+      case 'Sick':      return b.sickRemaining;
+      case 'Earned':    return b.earnedRemaining;
+      case 'Maternity': return b.maternityRemaining;
+      case 'Paternity': return b.paternityRemaining;
+      default:          return null;
+    }
+  }
+
   getDays(): number {
     if (!this.startDate() || !this.endDate()) return 0;
     const diff = new Date(this.endDate()).getTime() - new Date(this.startDate()).getTime();
@@ -53,6 +77,14 @@ export class LeaveFormComponent {
       this.toastService.warning('Please fill all required fields.');
       return;
     }
+
+    // Block past dates
+    if (new Date(this.startDate()) < new Date(this.minDate)) {
+      this.formError.set('Start date cannot be in the past.');
+      this.toastService.error('Start date cannot be in the past.');
+      return;
+    }
+
     if (new Date(this.endDate()) < new Date(this.startDate())) {
       this.formError.set('End date must be after start date.');
       this.toastService.error('End date must be after start date.');

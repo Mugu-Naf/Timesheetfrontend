@@ -46,3 +46,13 @@
 
 @media (max-width: 900px) { .form-layout { grid-template-columns: 1fr; } .info-panel { display: none; } }
 @media (max-width: 640px) { .form-row-2 { grid-template-columns: 1fr; } .type-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* Balance styles */
+.type-remaining { display: block; font-size: 0.7rem; color: var(--accent, #2563eb); font-weight: 600; margin-top: 2px; }
+.balance-note { color: var(--accent, #2563eb); font-size: 0.85rem; margin-left: 0.5rem; }
+.balance-grid { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.5rem; }
+.balance-item { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.6rem; background: #f0f2f5; border-radius: 8px; }
+.balance-label { font-size: 0.8rem; font-weight: 500; color: #1d1d1f; }
+.balance-value { font-size: 0.8rem; font-weight: 700; color: var(--accent, #2563eb); }
+.balance-hint { font-size: 0.72rem; color: #6e6e73; margin: 0 0 0.75rem; }
+.info-divider { border: none; border-top: 1px solid rgba(0,0,0,0.08); margin: 0.75rem 0; }

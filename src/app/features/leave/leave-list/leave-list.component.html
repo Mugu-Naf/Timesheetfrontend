@@ -7,6 +7,40 @@
     <a routerLink="/leave/new" class="btn-primary">+ Apply Leave</a>
   </div>
 
+  <!-- Leave Balance Summary -->
+  @if (balance()) {
+    <div class="balance-section">
+      <h3 class="balance-title">Leave Balance {{ balance()!.year }}</h3>
+      <div class="balance-cards">
+        <div class="balance-card">
+          <span class="balance-card__label">Casual</span>
+          <span class="balance-card__value">{{ balance()!.casualRemaining }}</span>
+          <span class="balance-card__total">/ {{ balance()!.casualTotal }} days</span>
+        </div>
+        <div class="balance-card">
+          <span class="balance-card__label">Sick</span>
+          <span class="balance-card__value">{{ balance()!.sickRemaining }}</span>
+          <span class="balance-card__total">/ {{ balance()!.sickTotal }} days</span>
+        </div>
+        <div class="balance-card">
+          <span class="balance-card__label">Earned</span>
+          <span class="balance-card__value">{{ balance()!.earnedRemaining }}</span>
+          <span class="balance-card__total">/ {{ balance()!.earnedTotal }} days</span>
+        </div>
+        <div class="balance-card">
+          <span class="balance-card__label">Maternity</span>
+          <span class="balance-card__value">{{ balance()!.maternityRemaining }}</span>
+          <span class="balance-card__total">/ {{ balance()!.maternityTotal }} days</span>
+        </div>
+        <div class="balance-card">
+          <span class="balance-card__label">Paternity</span>
+          <span class="balance-card__value">{{ balance()!.paternityRemaining }}</span>
+          <span class="balance-card__total">/ {{ balance()!.paternityTotal }} days</span>
+        </div>
+      </div>
+    </div>
+  }
+
   <div class="filters">
     <div class="filter-group">
       <label class="filter-label">Status</label>
