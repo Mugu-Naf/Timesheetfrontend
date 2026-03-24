@@ -1,4 +1,4 @@
-import { Component, signal, inject, effect } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
@@ -36,8 +36,6 @@ export class MainLayoutComponent {
   sidebarCollapsed = signal(false);
   mobileSidebarOpen = signal(false);
   pageTitle = signal('Dashboard');
-
-  private titleEffect = effect(() => {}, { allowSignalWrites: true });
 
   constructor() {
     this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e: any) => {

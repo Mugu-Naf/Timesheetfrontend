@@ -41,7 +41,7 @@ export class AuthService {
   }
 
   forgotPassword(payload: ForgotPasswordRequest) {
-    return this.http.post<void>(`${this.api}/auth/forgot-password`, payload);
+    return this.http.put<void>(`${this.api}/auth/forgot-password`, payload);
   }
 
   // ── Session ─────────────────────────────────────────────

@@ -6,7 +6,7 @@ import { OvertimeRule, OvertimeRuleCreateRequest, OvertimeRuleUpdateRequest } fr
 @Injectable({ providedIn: 'root' })
 export class OvertimeService {
   private http = inject(HttpClient);
-  private api  = `${environment.apiUrl}/overtimerules`;
+  private api  = `${environment.apiUrl}/OvertimeRule`;
 
   readonly rules   = signal<OvertimeRule[]>([]);
   readonly loading = signal(false);

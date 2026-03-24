@@ -6,7 +6,7 @@ import { LeaveRequest, LeaveCreateRequest } from '../models/leave.model';
 @Injectable({ providedIn: 'root' })
 export class LeaveService {
   private http = inject(HttpClient);
-  private api  = `${environment.apiUrl}/leaverequests`;
+  private api  = `${environment.apiUrl}/LeaveRequest`;
 
   readonly leaves  = signal<LeaveRequest[]>([]);
   readonly loading = signal(false);
@@ -25,14 +25,14 @@ export class LeaveService {
   }
 
   cancel(id: number) {
-    return this.http.post<LeaveRequest>(`${this.api}/${id}/cancel`, {});
+    return this.http.put<LeaveRequest>(`${this.api}/${id}/cancel`, {});
   }
 
   approve(id: number, comments?: string) {
-    return this.http.post<LeaveRequest>(`${this.api}/${id}/approve`, { comments });
+    return this.http.put<LeaveRequest>(`${this.api}/${id}/approve`, { comments });
   }
 
   reject(id: number, comments?: string) {
-    return this.http.post<LeaveRequest>(`${this.api}/${id}/reject`, { comments });
+    return this.http.put<LeaveRequest>(`${this.api}/${id}/reject`, { comments });
   }
 }

@@ -32,7 +32,7 @@ export class AttendanceCheckinComponent implements OnInit {
 
   ngOnInit() {
     this.load();
-    this.clockInterval = setInterval(() => this.currentTime.set(new Date()), 1000);
+    this.clockInterval = setInterval(() => this.currentTime.set(new Date()), 60000);
   }
 
   ngOnDestroy() { clearInterval(this.clockInterval); }
