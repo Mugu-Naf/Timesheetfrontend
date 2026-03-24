@@ -1,7 +1,9 @@
 <div class="page">
+
+  <!-- Header -->
   <div class="page-header">
     <div>
-      <h2 class="page-title">Attendance</h2>
+      <h2 class="page-title">My Attendance</h2>
       <p class="page-sub">{{ todayStr }}</p>
     </div>
   </div>
@@ -9,64 +11,92 @@
   <app-loader [show]="loading()" [inline]="true" />
 
   @if (!loading()) {
-    <!-- Live clock + Check-in card -->
-    <div class="checkin-hero">
-      <div class="clock-display">
-        <span class="clock-time">{{ currentTime() | date:'HH:mm' }}</span>
-        <span class="clock-date">{{ currentTime() | date:'EEEE, dd MMMM yyyy' }}</span>
-      </div>
 
-      <div class="checkin-status">
-        @if (!isCheckedIn()) {
-          <div class="status-pill status-pill--idle">⚪ Not Checked In</div>
-        } @else if (!isCheckedOut()) {
-          <div class="status-pill status-pill--in">🟢 Currently Working</div>
-        } @else {
-          <div class="status-pill status-pill--out">🔵 Shift Complete</div>
+    <!-- Check-in card (light theme) -->
+    <div class="checkin-card">
+      <div class="checkin-card__left">
+        <div class="clock-block">
+          <span class="clock-time">{{ currentTime() | date:'HH:mm' }}</span>
+          <span class="clock-date">{{ currentTime() | date:'EEEE, dd MMM yyyy' }}</span>
+        </div>
+
+        <div class="status-row">
+          @if (!isCheckedIn()) {
+            <span class="status-badge status-badge--idle">Not Checked In</span>
+          } @else if (!isCheckedOut()) {
+            <span class="status-badge status-badge--in">Currently Working</span>
+          } @else {
+            <span class="status-badge status-badge--done">Shift Complete</span>
+          }
+        </div>
+
+        @if (todayRecord()) {
+          <div class="time-row">
+            <div class="time-item">
+              <span class="time-item__label">Check In</span>
+              <span class="time-item__value">{{ todayRecord()!.checkInTime | date:'HH:mm' }}</span>
+            </div>
+            <span class="time-arrow">→</span>
+            <div class="time-item">
+              <span class="time-item__label">Check Out</span>
+              <span class="time-item__value">
+                {{ todayRecord()!.checkOutTime ? (todayRecord()!.checkOutTime | date:'HH:mm') : '—' }}
+              </span>
+            </div>
+            <span class="time-sep">|</span>
+            <div class="time-item">
+              <span class="time-item__label">Duration</span>
+              <span class="time-item__value time-item__value--green">{{ getWorkDuration() }}</span>
+            </div>
+          </div>
         }
       </div>
 
-      @if (todayRecord()) {
-        <div class="today-stats">
-          <div class="today-stat">
-            <span class="today-stat__label">Check In</span>
-            <span class="today-stat__value">{{ todayRecord()!.checkInTime | date:'HH:mm' }}</span>
-          </div>
-          <div class="today-stat__divider">→</div>
-          <div class="today-stat">
-            <span class="today-stat__label">Check Out</span>
-            <span class="today-stat__value">{{ todayRecord()!.checkOutTime ? (todayRecord()!.checkOutTime | date:'HH:mm') : '—' }}</span>
-          </div>
-          <div class="today-stat__divider">|</div>
-          <div class="today-stat">
-            <span class="today-stat__label">Duration</span>
-            <span class="today-stat__value today-stat__value--highlight">{{ getWorkDuration() }}</span>
-          </div>
-        </div>
-      }
-
-      <div class="checkin-actions">
+      <div class="checkin-card__right">
         @if (!isCheckedIn()) {
           <button class="btn-checkin" (click)="checkIn()" [disabled]="actionLoading()">
-            @if (actionLoading()) { <span class="spinner-white"></span> }
-            @else { ✅ }
+            @if (actionLoading()) { <span class="spinner-btn"></span> } @else { ✅ }
             Check In
           </button>
         } @else if (!isCheckedOut()) {
           <button class="btn-checkout" (click)="checkOut()" [disabled]="actionLoading()">
-            @if (actionLoading()) { <span class="spinner-white"></span> }
-            @else { 🚪 }
+            @if (actionLoading()) { <span class="spinner-btn"></span> } @else { 🚪 }
             Check Out
           </button>
         } @else {
-          <div class="done-msg">✅ You've completed your shift for today</div>
+          <div class="done-badge">✅ Shift complete for today</div>
         }
       </div>
     </div>
 
-    <!-- History -->
+    <!-- Summary stats -->
+    <div class="summary-grid">
+      <div class="summary-card summary-card--green">
+        <span class="summary-card__icon">✅</span>
+        <span class="summary-card__value">{{ totalPresent() }}</span>
+        <span class="summary-card__label">Present</span>
+      </div>
+      <div class="summary-card summary-card--amber">
+        <span class="summary-card__icon">🕐</span>
+        <span class="summary-card__value">{{ totalHalfDay() }}</span>
+        <span class="summary-card__label">Half Day</span>
+      </div>
+      <div class="summary-card summary-card--purple">
+        <span class="summary-card__icon">🏖️</span>
+        <span class="summary-card__value">{{ totalLeave() }}</span>
+        <span class="summary-card__label">On Leave</span>
+      </div>
+      <div class="summary-card summary-card--red">
+        <span class="summary-card__icon">❌</span>
+        <span class="summary-card__value">{{ totalAbsent() }}</span>
+        <span class="summary-card__label">Absent</span>
+      </div>
+    </div>
+
+    <!-- Full history table -->
     <div class="section-title-row">
-      <h3 class="section-title">Recent Attendance</h3>
+      <h3 class="section-title">Attendance History</h3>
+      <span class="record-count">{{ attendance().length }} records</span>
     </div>
 
     @if (attendance().length === 0) {
@@ -80,12 +110,18 @@
         <div class="table-wrapper">
           <table class="table">
             <thead>
-              <tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Duration</th><th>Status</th></tr>
+              <tr>
+                <th>Date</th>
+                <th>Check In</th>
+                <th>Check Out</th>
+                <th>Duration</th>
+                <th>Status</th>
+              </tr>
             </thead>
             <tbody>
-              @for (rec of attendance().slice(0, 30); track rec.attendanceId) {
+              @for (rec of attendance(); track rec.attendanceId) {
                 <tr>
-                  <td><strong>{{ rec.date | date:'dd MMM yyyy' }}</strong></td>
+                  <td><strong>{{ rec.date | date:'EEE, dd MMM yyyy' }}</strong></td>
                   <td>{{ rec.checkInTime ? (rec.checkInTime | date:'HH:mm') : '—' }}</td>
                   <td>{{ rec.checkOutTime ? (rec.checkOutTime | date:'HH:mm') : '—' }}</td>
                   <td>

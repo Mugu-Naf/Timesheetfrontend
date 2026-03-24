@@ -1,17 +1,96 @@
 <div class="page">
   <div class="page-header">
     <div>
-      <h2 class="page-title">Attendance Report</h2>
-      <p class="page-sub">Generate attendance report by employee and date range</p>
+      <h2 class="page-title">Attendance Management</h2>
+      <p class="page-sub">View all employee attendance and generate reports</p>
     </div>
   </div>
 
-  <div class="filter-card">
-    <div class="filter-row">
-      <div class="form-group">
-        <label class="form-label">Employee *</label>
-        <div class="input-wrapper">
-          <span class="input-icon">👤</span>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab" [class.tab--active]="activeTab() === 'all'" (click)="activeTab.set('all')">
+      📋 All Attendance
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'report'" (click)="activeTab.set('report')">
+      📊 Generate Report
+    </button>
+  </div>
+
+  <!-- ── ALL ATTENDANCE TAB ── -->
+  @if (activeTab() === 'all') {
+    <div class="filter-card">
+      <div class="filter-row">
+        <div class="form-group">
+          <label class="form-label">Filter by Employee</label>
+          <select class="form-input form-select" [(ngModel)]="filterEmpId" name="filterEmp">
+            <option [value]="null">— All Employees —</option>
+            @for (e of employees(); track e.employeeId) {
+              <option [value]="e.employeeId">{{ e.firstName }} {{ e.lastName }}</option>
+            }
+          </select>
+        </div>
+        <button class="btn-refresh" (click)="loadAllAttendance()" [disabled]="loading()">
+          🔄 Refresh
+        </button>
+      </div>
+    </div>
+
+    <app-loader [show]="loading()" [inline]="true" />
+
+    @if (!loading()) {
+      <div class="table-info-row">
+        <span class="record-count">{{ filteredAttendance().length }} records</span>
+      </div>
+
+      @if (filteredAttendance().length === 0) {
+        <div class="empty-state">
+          <div class="empty-state__icon">📅</div>
+          <h3>No attendance records found</h3>
+          <p>Records will appear here once employees check in.</p>
+        </div>
+      } @else {
+        <div class="table-card">
+          <div class="table-wrapper">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Date</th>
+                  <th>Check In</th>
+                  <th>Check Out</th>
+                  <th>Duration</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (rec of filteredAttendance(); track rec.attendanceId) {
+                  <tr>
+                    <td><strong>{{ rec.employeeName }}</strong></td>
+                    <td>{{ rec.date | date:'EEE, dd MMM yyyy' }}</td>
+                    <td>{{ rec.checkInTime ? (rec.checkInTime | date:'HH:mm') : '—' }}</td>
+                    <td>{{ rec.checkOutTime ? (rec.checkOutTime | date:'HH:mm') : '—' }}</td>
+                    <td>
+                      @if (rec.checkInTime && rec.checkOutTime) {
+                        {{ getDurationStr(rec.checkInTime, rec.checkOutTime) }}
+                      } @else { — }
+                    </td>
+                    <td><app-status-badge [status]="rec.status" /></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    }
+  }
+
+  <!-- ── REPORT TAB ── -->
+  @if (activeTab() === 'report') {
+    <div class="filter-card">
+      <div class="filter-row">
+        <div class="form-group">
+          <label class="form-label">Employee *</label>
           <select class="form-input form-select" [(ngModel)]="employeeId" name="emp">
             <option [value]="null">— Select Employee —</option>
             @for (e of employees(); track e.employeeId) {
@@ -19,71 +98,67 @@
             }
           </select>
         </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">From Date *</label>
-        <div class="input-wrapper">
-          <span class="input-icon">📅</span>
+        <div class="form-group">
+          <label class="form-label">From Date *</label>
           <input type="date" class="form-input" [(ngModel)]="fromDate" name="fromDate" />
         </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">To Date *</label>
-        <div class="input-wrapper">
-          <span class="input-icon">📅</span>
+        <div class="form-group">
+          <label class="form-label">To Date *</label>
           <input type="date" class="form-input" [(ngModel)]="toDate" name="toDate" />
         </div>
+        <button class="btn-generate" (click)="generateReport()" [disabled]="loading()">
+          @if (loading()) { <span class="spinner"></span> Generating... }
+          @else { 📊 Generate }
+        </button>
       </div>
-      <button class="btn-generate" (click)="generateReport()" [disabled]="loading()">
-        @if (loading()) { <span class="spinner"></span> Generating... }
-        @else { 📊 Generate Report }
-      </button>
     </div>
-  </div>
 
-  <app-loader [show]="loading()" [inline]="true" />
+    <app-loader [show]="loading()" [inline]="true" />
 
-  @if (!loading() && report()) {
-    <div class="report-grid">
-      <div class="report-hero">
-        <div class="report-hero__name">{{ report()!.employeeName }}</div>
-        <div class="report-hero__range">{{ report()!.fromDate | date:'dd MMM' }} – {{ report()!.toDate | date:'dd MMM yyyy' }}</div>
-        <div class="attendance-circle">
-          <svg viewBox="0 0 100 100" class="circle-svg">
-            <circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" stroke-width="10"/>
-            <circle cx="50" cy="50" r="40" fill="none" stroke="#22c55e" stroke-width="10"
-              [attr.stroke-dasharray]="getAttendancePercent() * 2.513 + ' 251.3'"
-              stroke-linecap="round" transform="rotate(-90 50 50)" />
-          </svg>
-          <div class="circle-label">
-            <span class="circle-percent">{{ getAttendancePercent() }}%</span>
-            <span class="circle-sub">Attendance</span>
+    @if (!loading() && report()) {
+      <div class="report-grid">
+        <div class="report-hero">
+          <div class="report-hero__name">{{ report()!.employeeName }}</div>
+          <div class="report-hero__range">
+            {{ report()!.fromDate | date:'dd MMM' }} – {{ report()!.toDate | date:'dd MMM yyyy' }}
+          </div>
+          <div class="attendance-circle">
+            <svg viewBox="0 0 100 100" class="circle-svg">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" stroke-width="10"/>
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#22c55e" stroke-width="10"
+                [attr.stroke-dasharray]="getAttendancePercent() * 2.513 + ' 251.3'"
+                stroke-linecap="round" transform="rotate(-90 50 50)" />
+            </svg>
+            <div class="circle-label">
+              <span class="circle-percent">{{ getAttendancePercent() }}%</span>
+              <span class="circle-sub">Attendance</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-block stat-block--green">
+            <span class="stat-block__icon">✅</span>
+            <span class="stat-block__value">{{ report()!.totalPresent }}</span>
+            <span class="stat-block__label">Present</span>
+          </div>
+          <div class="stat-block stat-block--red">
+            <span class="stat-block__icon">❌</span>
+            <span class="stat-block__value">{{ report()!.totalAbsent }}</span>
+            <span class="stat-block__label">Absent</span>
+          </div>
+          <div class="stat-block stat-block--amber">
+            <span class="stat-block__icon">🕐</span>
+            <span class="stat-block__value">{{ report()!.totalHalfDay }}</span>
+            <span class="stat-block__label">Half Day</span>
+          </div>
+          <div class="stat-block stat-block--purple">
+            <span class="stat-block__icon">🏖️</span>
+            <span class="stat-block__value">{{ report()!.totalLeave }}</span>
+            <span class="stat-block__label">On Leave</span>
           </div>
         </div>
       </div>
-
-      <div class="stats-grid">
-        <div class="stat-block stat-block--green">
-          <span class="stat-block__icon">✅</span>
-          <span class="stat-block__value">{{ report()!.totalPresent }}</span>
-          <span class="stat-block__label">Present</span>
-        </div>
-        <div class="stat-block stat-block--red">
-          <span class="stat-block__icon">❌</span>
-          <span class="stat-block__value">{{ report()!.totalAbsent }}</span>
-          <span class="stat-block__label">Absent</span>
-        </div>
-        <div class="stat-block stat-block--amber">
-          <span class="stat-block__icon">🕐</span>
-          <span class="stat-block__value">{{ report()!.totalHalfDay }}</span>
-          <span class="stat-block__label">Half Day</span>
-        </div>
-        <div class="stat-block stat-block--purple">
-          <span class="stat-block__icon">🏖️</span>
-          <span class="stat-block__value">{{ report()!.totalLeave }}</span>
-          <span class="stat-block__label">On Leave</span>
-        </div>
-      </div>
-    </div>
+    }
   }
 </div>

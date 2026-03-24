@@ -8,50 +8,56 @@
   flex-direction: column;
   transition: width 0.25s ease;
   overflow: hidden;
-  border-right: 1px solid #e2e8f0;
-  box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+  border-right: 1px solid #e8edf2;
+  box-shadow: 1px 0 0 #e8edf2;
 }
 
 .sidebar--collapsed { width: 68px; }
 
-/* Brand */
 .sidebar__brand {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 1.375rem 1.25rem;
+  padding: 1.25rem 1.25rem;
   border-bottom: 1px solid #f1f5f9;
   flex-shrink: 0;
+  background: #fff;
 }
 
-.sidebar__brand-icon { font-size: 1.5rem; flex-shrink: 0; }
+.sidebar__brand-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  background: #eff6ff;
+  border-radius: 0.625rem;
+  display: flex; align-items: center; justify-content: center;
+}
 
 .sidebar__brand-text {
-  font-size: 1.0625rem;
+  font-size: 1rem;
   font-weight: 800;
   color: #1e40af;
   white-space: nowrap;
   letter-spacing: -0.02em;
 }
 
-/* User */
 .sidebar__user {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 1rem 1.25rem;
+  padding: 0.875rem 1.25rem;
   border-bottom: 1px solid #f1f5f9;
   flex-shrink: 0;
-  background: #f8fafc;
+  background: #fafbff;
 }
 
 .sidebar__avatar {
-  width: 36px; height: 36px;
+  width: 34px; height: 34px;
   border-radius: 50%;
   background: linear-gradient(135deg, #3b82f6, #6366f1);
   color: #fff;
   font-weight: 700;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
@@ -59,7 +65,7 @@
 .sidebar__user-info { display: flex; flex-direction: column; min-width: 0; }
 
 .sidebar__user-name {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: #0f172a;
   white-space: nowrap;
@@ -68,18 +74,19 @@
 }
 
 .sidebar__user-role {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: #3b82f6;
-  font-weight: 600;
-  margin-top: 1px;
+  font-weight: 700;
+  margin-top: 2px;
   background: #eff6ff;
   padding: 1px 6px;
   border-radius: 4px;
   display: inline-block;
   width: fit-content;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-/* Nav */
 .sidebar__nav {
   flex: 1;
   overflow-y: auto;
@@ -89,14 +96,14 @@
   gap: 0.125rem;
 }
 
-.sidebar__nav::-webkit-scrollbar { width: 4px; }
+.sidebar__nav::-webkit-scrollbar { width: 3px; }
 .sidebar__nav::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.625rem 0.875rem;
+  padding: 0.6rem 0.875rem;
   border-radius: 0.625rem;
   color: #475569;
   text-decoration: none;
@@ -111,28 +118,25 @@
   white-space: nowrap;
 }
 
-.nav-item:hover { background: #f1f5f9; color: #1e40af; }
+.nav-item:hover { background: #f0f4f8; color: #1e40af; }
 .nav-item--active { background: #eff6ff; color: #1d4ed8; font-weight: 600; }
-
 .nav-item--group { justify-content: flex-start; }
-.nav-item--expanded { background: #f1f5f9; color: #1e40af; }
+.nav-item--expanded { background: #f0f4f8; color: #1e40af; }
 
-.nav-item__icon { font-size: 1.1rem; flex-shrink: 0; width: 20px; text-align: center; }
-.nav-item__label { flex: 1; }
-
-.nav-item__arrow {
-  font-size: 1.125rem;
-  color: #94a3b8;
-  transition: transform 0.2s;
-  line-height: 1;
+.nav-item__icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
 }
+.nav-item__label { flex: 1; }
+.nav-item__arrow { font-size: 1.125rem; color: #94a3b8; transition: transform 0.2s; line-height: 1; }
 .nav-item__arrow--open { transform: rotate(90deg); }
 
-/* Children */
 .nav-children {
   margin-left: 1.25rem;
   padding-left: 0.75rem;
-  border-left: 2px solid #e2e8f0;
+  border-left: 2px solid #e8edf2;
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
@@ -142,7 +146,7 @@
 
 .nav-child {
   display: block;
-  padding: 0.5rem 0.75rem;
+  padding: 0.45rem 0.75rem;
   border-radius: 0.5rem;
   color: #64748b;
   text-decoration: none;
@@ -151,11 +155,9 @@
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
 }
-
-.nav-child:hover { background: #f1f5f9; color: #1e40af; }
+.nav-child:hover { background: #f0f4f8; color: #1e40af; }
 .nav-child--active { color: #1d4ed8; background: #eff6ff; font-weight: 600; }
 
-/* Footer */
 .sidebar__footer {
   padding: 0.625rem;
   border-top: 1px solid #f1f5f9;
