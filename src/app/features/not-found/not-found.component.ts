@@ -10,8 +10,8 @@ import { RouterLink } from '@angular/router';
       <div class="notfound__box">
         <div class="notfound__code">404</div>
         <h2 class="notfound__title">Page Not Found</h2>
-        <p class="notfound__msg">The page you are looking for does not exist.</p>
-        <a routerLink="/login" class="notfound__btn">Go to Login</a>
+        <p class="notfound__msg">The page you're looking for doesn't exist or was moved.</p>
+        <a routerLink="/login" class="notfound__btn">← Back to Login</a>
       </div>
     </div>
   `,
@@ -21,43 +21,54 @@ import { RouterLink } from '@angular/router';
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f8fafc;
+      background: var(--bg, #f0f2f5);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     .notfound__box {
       text-align: center;
-      padding: 3rem 2rem;
+      padding: 3rem 2.5rem;
       background: #fff;
-      border-radius: 1rem;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+      border-radius: 20px;
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      max-width: 420px;
+      width: 100%;
     }
     .notfound__code {
-      font-size: 6rem;
+      font-size: 7rem;
       font-weight: 800;
-      color: #3b82f6;
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       line-height: 1;
+      letter-spacing: -0.04em;
     }
     .notfound__title {
       font-size: 1.5rem;
       font-weight: 700;
       color: #0f172a;
-      margin: 0.5rem 0;
+      margin: 0.75rem 0 0.5rem;
+      letter-spacing: -0.02em;
     }
     .notfound__msg {
       color: #64748b;
-      margin-bottom: 1.5rem;
+      font-size: 0.9375rem;
+      margin: 0 0 2rem;
     }
     .notfound__btn {
       display: inline-block;
-      padding: 0.625rem 1.5rem;
-      background: #3b82f6;
+      padding: 0.75rem 1.75rem;
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
       color: #fff;
-      border-radius: 0.5rem;
+      border-radius: 12px;
       text-decoration: none;
       font-weight: 600;
-      transition: background 0.15s;
+      font-size: 0.9375rem;
+      transition: opacity 0.15s, transform 0.15s;
+      box-shadow: 0 4px 14px rgba(37,99,235,0.35);
     }
-    .notfound__btn:hover { background: #2563eb; }
+    .notfound__btn:hover { opacity: 0.9; transform: translateY(-1px); }
   `]
 })
 export class NotFoundComponent {}
