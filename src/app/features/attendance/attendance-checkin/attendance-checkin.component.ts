@@ -27,10 +27,21 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
 
+  // Today's date string for comparison
+  private todayDate = new Date().toDateString();
+
   isCheckedIn  = computed(() => !!this.todayRecord()?.checkInTime);
   isCheckedOut = computed(() => !!this.todayRecord()?.checkOutTime);
 
-  // Summary stats computed from all records
+  // Detect if there's a previous day record with check-in but no check-out
+  forgotCheckout = computed(() => {
+    return this.attendance().find(a => {
+      const recDate = new Date(a.date).toDateString();
+      return recDate !== this.todayDate && a.checkInTime && !a.checkOutTime;
+    }) ?? null;
+  });
+
+  // Summary stats
   totalPresent  = computed(() => this.attendance().filter(a => a.status === 'Present').length);
   totalHalfDay  = computed(() => this.attendance().filter(a => a.status === 'HalfDay').length);
   totalLeave    = computed(() => this.attendance().filter(a => a.status === 'Leave').length);
@@ -49,13 +60,11 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.attService.getMyAttendance().subscribe({
       next: att => {
-        // Sort newest first
         const sorted = [...att].sort((a, b) =>
           new Date(b.date).getTime() - new Date(a.date).getTime()
         );
         this.attendance.set(sorted);
-        const today = new Date().toDateString();
-        this.todayRecord.set(att.find(a => new Date(a.date).toDateString() === today) ?? null);
+        this.todayRecord.set(att.find(a => new Date(a.date).toDateString() === this.todayDate) ?? null);
         this.loading.set(false);
       },
       error: () => {
@@ -86,7 +95,7 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
     this.attService.checkOut({ checkOutTime: new Date().toISOString() }).subscribe({
       next: rec => {
         this.todayRecord.set(rec);
-        this.attendance.update(list => [rec, ...list.filter(a => a.attendanceId !== rec.attendanceId)]);
+        this.attendance.update(list => list.map(a => a.attendanceId === rec.attendanceId ? rec : a));
         this.actionLoading.set(false);
         this.toastService.success('Checked out successfully!');
       },

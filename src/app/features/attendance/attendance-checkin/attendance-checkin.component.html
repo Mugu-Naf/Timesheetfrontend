@@ -12,7 +12,18 @@
 
   @if (!loading()) {
 
-    <!-- Check-in card (light theme) -->
+    <!-- ⚠️ Forgot checkout reminder -->
+    @if (forgotCheckout()) {
+      <div class="reminder-banner">
+        <span class="reminder-banner__icon">⚠️</span>
+        <div class="reminder-banner__text">
+          <strong>You forgot to check out!</strong>
+          <span>You checked in on {{ forgotCheckout()!.date | date:'EEE, dd MMM yyyy' }} but never checked out. Please contact HR to fix this record.</span>
+        </div>
+      </div>
+    }
+
+    <!-- Check-in card -->
     <div class="checkin-card">
       <div class="checkin-card__left">
         <div class="clock-block">
@@ -53,7 +64,10 @@
       </div>
 
       <div class="checkin-card__right">
-        @if (!isCheckedIn()) {
+        <!-- Show warning if forgot checkout — disable check-in -->
+        @if (forgotCheckout()) {
+          <div class="blocked-badge">🚫 Fix previous checkout first</div>
+        } @else if (!isCheckedIn()) {
           <button class="btn-checkin" (click)="checkIn()" [disabled]="actionLoading()">
             @if (actionLoading()) { <span class="spinner-btn"></span> } @else { ✅ }
             Check In
@@ -120,10 +134,18 @@
             </thead>
             <tbody>
               @for (rec of attendance(); track rec.attendanceId) {
-                <tr>
+                <tr [class.row--warning]="rec.checkInTime && !rec.checkOutTime && (rec.date | date:'yyyy-MM-dd') !== (currentTime() | date:'yyyy-MM-dd')">
                   <td><strong>{{ rec.date | date:'EEE, dd MMM yyyy' }}</strong></td>
                   <td>{{ rec.checkInTime ? (rec.checkInTime | date:'HH:mm') : '—' }}</td>
-                  <td>{{ rec.checkOutTime ? (rec.checkOutTime | date:'HH:mm') : '—' }}</td>
+                  <td>
+                    @if (rec.checkOutTime) {
+                      {{ rec.checkOutTime | date:'HH:mm' }}
+                    } @else if ((rec.date | date:'yyyy-MM-dd') !== (currentTime() | date:'yyyy-MM-dd')) {
+                      <span class="missing-checkout">⚠️ Missing</span>
+                    } @else {
+                      —
+                    }
+                  </td>
                   <td>
                     @if (rec.checkInTime && rec.checkOutTime) {
                       {{ getDurationStr(rec.checkInTime, rec.checkOutTime) }}
