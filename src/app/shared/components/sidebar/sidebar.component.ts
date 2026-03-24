@@ -89,6 +89,11 @@ export class SidebarComponent {
       label: 'Overtime Rules', icon: '⚙️',
       route: '/overtime',
       roles: ['Admin']
+    },
+    {
+      label: 'Audit Logs', icon: '📋',
+      route: '/audit-logs',
+      roles: ['Admin']
     }
   ];
 

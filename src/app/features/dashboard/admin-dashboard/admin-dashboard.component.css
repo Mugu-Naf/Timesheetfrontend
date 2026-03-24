@@ -49,3 +49,20 @@
 .empty-state { padding: 2rem; text-align: center; color: #94a3b8; font-size: 0.875rem; }
 @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 640px) { .recent-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.audit-card { margin-top: 0; }
+.audit-time { color: #64748b; font-size: 0.8rem; white-space: nowrap; }
+.audit-desc { color: #64748b; font-size: 0.8rem; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.audit-badge {
+  display: inline-block; padding: 0.15rem 0.5rem;
+  border-radius: 2rem; font-size: 0.68rem; font-weight: 700;
+  white-space: nowrap; letter-spacing: 0.02em;
+}
+.audit-badge--green  { background: #f0fdf4; color: #16a34a; }
+.audit-badge--blue   { background: #eff6ff; color: #1d4ed8; }
+.audit-badge--red    { background: #fef2f2; color: #dc2626; }
+.audit-badge--amber  { background: #fffbeb; color: #d97706; }
+.audit-badge--purple { background: #f5f3ff; color: #7c3aed; }
+.audit-badge--teal   { background: #f0fdfa; color: #0d9488; }
+.audit-badge--gray   { background: #f8fafc; color: #64748b; }

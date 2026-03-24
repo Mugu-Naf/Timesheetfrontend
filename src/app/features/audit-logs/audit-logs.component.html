@@ -1,0 +1,142 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Audit Logs</h2>
+      <p class="page-sub">Track all user actions across the system</p>
+    </div>
+    <div class="header-meta">
+      <span class="total-badge">{{ totalCount() }} total records</span>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-card">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label class="filter-label">Username</label>
+        <input type="text" class="form-input" placeholder="Search user..."
+          [value]="filterUsername()"
+          (input)="filterUsername.set($any($event.target).value)" />
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Action</label>
+        <select class="form-select"
+          [value]="filterAction()"
+          (change)="filterAction.set($any($event.target).value)">
+          @for (a of actions; track a) {
+            <option [value]="a">{{ a || 'All Actions' }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Entity Type</label>
+        <select class="form-select"
+          [value]="filterEntityType()"
+          (change)="filterEntityType.set($any($event.target).value)">
+          @for (e of entityTypes; track e) {
+            <option [value]="e">{{ e || 'All Entities' }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">From Date</label>
+        <input type="date" class="form-input"
+          [value]="filterFromDate()"
+          (change)="filterFromDate.set($any($event.target).value)" />
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">To Date</label>
+        <input type="date" class="form-input"
+          [value]="filterToDate()"
+          (change)="filterToDate.set($any($event.target).value)" />
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button class="btn-primary" (click)="applyFilters()">🔍 Apply Filters</button>
+      <button class="btn-secondary" (click)="clearFilters()">✕ Clear</button>
+    </div>
+  </div>
+
+  <!-- Loader -->
+  <app-loader [show]="loading()" [inline]="true" message="Loading audit logs..." />
+
+  @if (!loading()) {
+    @if (logs().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state__icon">📋</div>
+        <h3>No audit logs found</h3>
+        <p>Try adjusting your filters or date range.</p>
+      </div>
+    } @else {
+      <!-- Table -->
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Timestamp</th>
+                <th>Username</th>
+                <th>Action</th>
+                <th>Entity</th>
+                <th>ID</th>
+                <th>Description</th>
+                <th>IP Address</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (log of logs(); track log.auditLogId) {
+                <tr>
+                  <td class="col-id">{{ log.auditLogId }}</td>
+                  <td class="col-time">
+                    <span class="time-date">{{ log.timestamp | date:'dd MMM yyyy' }}</span>
+                    <span class="time-hour">{{ log.timestamp | date:'HH:mm:ss' }}</span>
+                  </td>
+                  <td class="col-user">
+                    <div class="user-chip">
+                      <span class="user-avatar">{{ log.username[0].toUpperCase() }}</span>
+                      <span>{{ log.username }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="getActionClass(log.action)">{{ log.action }}</span>
+                  </td>
+                  <td class="col-entity">{{ log.entityType }}</td>
+                  <td class="col-eid">{{ log.entityId ?? '—' }}</td>
+                  <td class="col-desc">{{ log.description ?? '—' }}</td>
+                  <td class="col-ip">{{ log.ipAddress ?? '—' }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="getStatusClass(log.status)">{{ log.status }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button class="page-btn" [disabled]="page() === 1" (click)="goToPage(page() - 1)">‹ Prev</button>
+
+          @for (p of pages; track p) {
+            <button class="page-btn" [class.page-btn--active]="p === page()" (click)="goToPage(p)">{{ p }}</button>
+          }
+
+          <button class="page-btn" [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">Next ›</button>
+
+          <span class="page-info">Page {{ page() }} of {{ totalPages() }}</span>
+        </div>
+      }
+    }
+  }
+</div>

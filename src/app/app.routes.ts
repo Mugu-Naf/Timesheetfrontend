@@ -31,6 +31,7 @@ import { EmployeeProfileComponent } from './features/employees/employee-profile/
 
 import { OvertimeRulesComponent } from './features/overtime/overtime-rules/overtime-rules.component';
 import { NotFoundComponent } from './features/not-found/not-found.component';
+import { AuditLogsComponent } from './features/audit-logs/audit-logs.component';
 
 
 export const routes: Routes = [
@@ -166,6 +167,17 @@ export const routes: Routes = [
     data: { roles: ['Admin'] },
     children: [
       { path: '', component: OvertimeRulesComponent }
+    ]
+  },
+
+  // ✅ AUDIT LOGS
+  {
+    path: 'audit-logs',
+    component: MainLayoutComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Admin'] },
+    children: [
+      { path: '', component: AuditLogsComponent }
     ]
   },
 

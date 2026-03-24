@@ -101,5 +101,37 @@
         }
       </div>
     </div>
+
+    <!-- Recent Audit Logs -->
+    <div class="card audit-card">
+      <div class="card__header">
+        <h3 class="card__title">📋 Recent Activity</h3>
+        <a routerLink="/audit-logs" class="card__link">View all logs →</a>
+      </div>
+      @if (recentAuditLogs().length === 0) {
+        <div class="empty-state">No recent activity.</div>
+      } @else {
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr><th>Time</th><th>User</th><th>Action</th><th>Entity</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              @for (log of recentAuditLogs(); track log.auditLogId) {
+                <tr>
+                  <td class="audit-time">{{ log.timestamp | date:'dd MMM HH:mm' }}</td>
+                  <td><strong>{{ log.username }}</strong></td>
+                  <td>
+                    <span class="audit-badge" [ngClass]="getActionClass(log.action)">{{ log.action }}</span>
+                  </td>
+                  <td>{{ log.entityType }}</td>
+                  <td class="audit-desc">{{ log.description ?? '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
   }
 </div>

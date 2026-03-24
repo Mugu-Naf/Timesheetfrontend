@@ -19,7 +19,8 @@ const PAGE_TITLES: Record<string, string> = {
   '/projects':           'Projects',
   '/projects/new':       'New Project',
   '/employees/profile':  'My Profile',
-  '/overtime':           'Overtime Rules'
+  '/overtime':           'Overtime Rules',
+  '/audit-logs':         'Audit Logs'
 };
 
 @Component({
