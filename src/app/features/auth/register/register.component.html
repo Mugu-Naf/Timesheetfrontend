@@ -1,66 +1,63 @@
-<div class="auth-wrapper">
-  <div class="auth-panel">
-    <div class="auth-panel__content">
-      <div class="auth-panel__logo">⏱</div>
-      <h1 class="auth-panel__title">Join Timesheet Management</h1>
-      <p class="auth-panel__subtitle">Create your account and start tracking your work hours efficiently.</p>
-      <div class="steps-visual">
-        <div class="step-dot" [class.step-dot--active]="currentStep() >= 1" [class.step-dot--done]="currentStep() > 1">
-          <span>1</span><small>Credentials</small>
-        </div>
-        <div class="step-line" [class.step-line--done]="currentStep() > 1"></div>
-        <div class="step-dot" [class.step-dot--active]="currentStep() >= 2" [class.step-dot--done]="currentStep() > 2">
-          <span>2</span><small>Profile</small>
-        </div>
-      </div>
-    </div>
+<div class="auth-page">
+
+  <!-- Brand -->
+  <div class="auth-brand">
+    <span class="auth-brand__icon">⏱</span>
+    <span class="auth-brand__name">Timesheet Management</span>
   </div>
 
-  <div class="auth-form-wrapper">
+  <div class="auth-center">
     <div class="auth-card">
-      <div class="auth-card__header">
-        <h2>{{ currentStep() === 1 ? 'Create Account' : 'Your Profile' }}</h2>
-        <p>{{ currentStep() === 1 ? 'Set up your login credentials' : 'Tell us about yourself' }}</p>
-        <div class="step-indicator">
-          <span class="step-pill" [class.step-pill--active]="currentStep() === 1">1</span>
-          <span class="step-divider">—</span>
-          <span class="step-pill" [class.step-pill--active]="currentStep() === 2">2</span>
+
+      <!-- Header -->
+      <div class="auth-card__top">
+        <div class="auth-card__avatar">TM</div>
+        <h1 class="auth-card__title">{{ currentStep() === 1 ? 'Create Account' : 'Your Profile' }}</h1>
+        <p class="auth-card__sub">{{ currentStep() === 1 ? 'Set up your login credentials' : 'Tell us about yourself' }}</p>
+
+        <!-- Step indicator -->
+        <div class="step-row">
+          <div class="step-item" [class.step-item--active]="currentStep() >= 1" [class.step-item--done]="currentStep() > 1">
+            <div class="step-circle">{{ currentStep() > 1 ? '✓' : '1' }}</div>
+            <span>Credentials</span>
+          </div>
+          <div class="step-line" [class.step-line--done]="currentStep() > 1"></div>
+          <div class="step-item" [class.step-item--active]="currentStep() >= 2">
+            <div class="step-circle">2</div>
+            <span>Profile</span>
+          </div>
         </div>
       </div>
 
       <!-- Step 1: Credentials -->
       @if (currentStep() === 1) {
         <form class="auth-form" (ngSubmit)="nextStep()" novalidate>
+
           <div class="form-group">
-            <label class="form-label">Username *</label>
-            <div class="input-wrapper">
-              <span class="input-icon">👤</span>
-              <input type="text" class="form-input" placeholder="Choose a username"
-                [(ngModel)]="username" name="username" autocomplete="username" />
-            </div>
+            <label class="form-label">Username <span class="req">*</span></label>
+            <input type="text" class="form-input" placeholder="Choose a username"
+              [(ngModel)]="username" name="username" autocomplete="username" />
           </div>
 
           <div class="form-group">
-            <label class="form-label">Password *</label>
-            <div class="input-wrapper">
-              <span class="input-icon">🔒</span>
+            <label class="form-label">Password <span class="req">*</span></label>
+            <div class="input-pw">
               <input [type]="showPassword() ? 'text' : 'password'"
-                class="form-input form-input--with-toggle" placeholder="Min 6 characters"
+                class="form-input" placeholder="Min 6 characters"
                 [(ngModel)]="password" name="password" autocomplete="new-password" />
-              <button type="button" class="password-toggle" (click)="showPassword.update(v=>!v)">
+              <button type="button" class="pw-toggle" (click)="showPassword.update(v=>!v)">
                 {{ showPassword() ? '🙈' : '👁️' }}
               </button>
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Confirm Password *</label>
-            <div class="input-wrapper">
-              <span class="input-icon">🔒</span>
+            <label class="form-label">Confirm Password <span class="req">*</span></label>
+            <div class="input-pw">
               <input [type]="showConfirm() ? 'text' : 'password'"
-                class="form-input form-input--with-toggle" placeholder="Re-enter password"
+                class="form-input" placeholder="Re-enter password"
                 [(ngModel)]="confirmPwd" name="confirmPwd" autocomplete="new-password" />
-              <button type="button" class="password-toggle" (click)="showConfirm.update(v=>!v)">
+              <button type="button" class="pw-toggle" (click)="showConfirm.update(v=>!v)">
                 {{ showConfirm() ? '🙈' : '👁️' }}
               </button>
             </div>
@@ -70,10 +67,10 @@
             <div class="form-error-banner"><span>⚠️</span> {{ formError() }}</div>
           }
 
-          <button type="submit" class="btn-primary">Continue →</button>
+          <button type="submit" class="btn-submit">Continue →</button>
 
           <p class="auth-card__footer">
-            Already have an account? <a routerLink="/login" class="link">Sign in</a>
+            Already have an account? <a routerLink="/login" class="footer-link">Sign in</a>
           </p>
         </form>
       }
@@ -81,63 +78,46 @@
       <!-- Step 2: Profile -->
       @if (currentStep() === 2) {
         <form class="auth-form" (ngSubmit)="onSubmit()" novalidate>
+
           <div class="form-row-2">
             <div class="form-group">
-              <label class="form-label">First Name *</label>
-              <div class="input-wrapper">
-                <span class="input-icon">✏️</span>
-                <input type="text" class="form-input" placeholder="First name"
-                  [(ngModel)]="firstName" name="firstName" />
-              </div>
+              <label class="form-label">First Name <span class="req">*</span></label>
+              <input type="text" class="form-input" placeholder="First name"
+                [(ngModel)]="firstName" name="firstName" />
             </div>
             <div class="form-group">
-              <label class="form-label">Last Name *</label>
-              <div class="input-wrapper">
-                <span class="input-icon">✏️</span>
-                <input type="text" class="form-input" placeholder="Last name"
-                  [(ngModel)]="lastName" name="lastName" />
-              </div>
+              <label class="form-label">Last Name <span class="req">*</span></label>
+              <input type="text" class="form-input" placeholder="Last name"
+                [(ngModel)]="lastName" name="lastName" />
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Email *</label>
-            <div class="input-wrapper">
-              <span class="input-icon">📧</span>
-              <input type="email" class="form-input" placeholder="your@email.com"
-                [(ngModel)]="email" name="email" autocomplete="email" />
-            </div>
+            <label class="form-label">Email <span class="req">*</span></label>
+            <input type="email" class="form-input" placeholder="your@email.com"
+              [(ngModel)]="email" name="email" autocomplete="email" />
           </div>
 
           <div class="form-group">
-            <label class="form-label">Phone</label>
-            <div class="input-wrapper">
-              <span class="input-icon">📱</span>
-              <input type="tel" class="form-input" placeholder="Phone number (optional)"
-                [(ngModel)]="phone" name="phone" />
-            </div>
+            <label class="form-label">Phone <span class="form-hint">(optional)</span></label>
+            <input type="tel" class="form-input" placeholder="Phone number"
+              [(ngModel)]="phone" name="phone" />
           </div>
 
           <div class="form-row-2">
             <div class="form-group">
               <label class="form-label">Department</label>
-              <div class="input-wrapper">
-                <span class="input-icon">🏢</span>
-                <select class="form-input form-select" [(ngModel)]="department" name="department">
-                  <option value="">Select dept</option>
-                  @for (dept of departments; track dept) {
-                    <option [value]="dept">{{ dept }}</option>
-                  }
-                </select>
-              </div>
+              <select class="form-input" [(ngModel)]="department" name="department">
+                <option value="">Select dept</option>
+                @for (dept of departments; track dept) {
+                  <option [value]="dept">{{ dept }}</option>
+                }
+              </select>
             </div>
             <div class="form-group">
               <label class="form-label">Job Title</label>
-              <div class="input-wrapper">
-                <span class="input-icon">💼</span>
-                <input type="text" class="form-input" placeholder="e.g. Developer"
-                  [(ngModel)]="jobTitle" name="jobTitle" />
-              </div>
+              <input type="text" class="form-input" placeholder="e.g. Developer"
+                [(ngModel)]="jobTitle" name="jobTitle" />
             </div>
           </div>
 
@@ -146,14 +126,17 @@
           }
 
           <div class="btn-row">
-            <button type="button" class="btn-secondary" (click)="prevStep()">← Back</button>
-            <button type="submit" class="btn-primary" [disabled]="loading()">
+            <button type="button" class="btn-back" (click)="prevStep()">← Back</button>
+            <button type="submit" class="btn-submit btn-submit--flex" [disabled]="loading()">
               @if (loading()) { <span class="spinner"></span> Creating... }
               @else { Create Account }
             </button>
           </div>
+
         </form>
       }
+
     </div>
   </div>
+
 </div>
