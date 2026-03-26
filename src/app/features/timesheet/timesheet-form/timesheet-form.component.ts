@@ -43,7 +43,10 @@ export class TimesheetFormComponent implements OnInit {
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) { this.isEdit.set(true); this.editId.set(+id); this.loadTimesheet(+id); }
-    else { this.date.set(new Date().toISOString().split('T')[0]); }
+    else {
+      // Default to today, allow past dates but NOT future dates
+      this.date.set(new Date().toISOString().split('T')[0]);
+    }
     this.loadProjects();
   }
 
@@ -68,10 +71,23 @@ export class TimesheetFormComponent implements OnInit {
     });
   }
 
+  // Today's date for max date constraint (no future timesheets)
+  maxDate = new Date().toISOString().split('T')[0];
+
+  isSelectedWeekend = () => {
+    const d = new Date(this.date());
+    return d.getDay() === 0 || d.getDay() === 6;
+  };
+
   onSubmit() {
     if (!this.date() || !this.hoursWorked()) {
       this.formError.set('Date and hours are required.');
       this.toastService.warning('Date and hours are required.');
+      return;
+    }
+    if (this.date() > this.maxDate) {
+      this.formError.set('Cannot submit timesheet for a future date.');
+      this.toastService.warning('Cannot submit timesheet for a future date.');
       return;
     }
     if ((this.hoursWorked() ?? 0) < 0.25 || (this.hoursWorked() ?? 0) > 24) {

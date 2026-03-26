@@ -45,13 +45,13 @@
           <div class="time-row">
             <div class="time-item">
               <span class="time-item__label">Check In</span>
-              <span class="time-item__value">{{ todayRecord()!.checkInTime | date:'HH:mm' }}</span>
+              <span class="time-item__value">{{ formatTime(todayRecord()!.checkInTime) }}</span>
             </div>
             <span class="time-arrow">→</span>
             <div class="time-item">
               <span class="time-item__label">Check Out</span>
               <span class="time-item__value">
-                {{ todayRecord()!.checkOutTime ? (todayRecord()!.checkOutTime | date:'HH:mm') : '—' }}
+                {{ todayRecord()!.checkOutTime ? formatTime(todayRecord()!.checkOutTime) : '—' }}
               </span>
             </div>
             <span class="time-sep">|</span>
@@ -136,10 +136,10 @@
               @for (rec of attendance(); track rec.attendanceId) {
                 <tr [class.row--warning]="rec.checkInTime && !rec.checkOutTime && (rec.date | date:'yyyy-MM-dd') !== (currentTime() | date:'yyyy-MM-dd')">
                   <td><strong>{{ rec.date | date:'EEE, dd MMM yyyy' }}</strong></td>
-                  <td>{{ rec.checkInTime ? (rec.checkInTime | date:'HH:mm') : '—' }}</td>
+                  <td>{{ rec.checkInTime ? formatTime(rec.checkInTime) : '—' }}</td>
                   <td>
                     @if (rec.checkOutTime) {
-                      {{ rec.checkOutTime | date:'HH:mm' }}
+                      {{ formatTime(rec.checkOutTime) }}
                     } @else if ((rec.date | date:'yyyy-MM-dd') !== (currentTime() | date:'yyyy-MM-dd')) {
                       <span class="missing-checkout">⚠️ Missing</span>
                     } @else {

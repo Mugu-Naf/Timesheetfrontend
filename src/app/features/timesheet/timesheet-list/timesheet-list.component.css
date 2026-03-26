@@ -50,3 +50,7 @@
 .btn-primary:hover { background: var(--accent-h); }
 
 @media (max-width: 640px) { .filters { flex-direction: column; align-items: flex-start; } .search-input { width: 100%; } }
+
+.row--weekend td { background: #fffbeb; }
+.weekend-tag { display: inline-block; margin-left: 0.4rem; padding: 0.1rem 0.4rem; background: #fef3c7; color: #92400e; border-radius: 4px; font-size: 0.65rem; font-weight: 600; vertical-align: middle; }
+.ot-weekend { color: #d97706; font-weight: 600; }

@@ -38,6 +38,16 @@ export class ProjectFormComponent implements OnInit {
     this.formError.set('');
   });
 
+  // Auto-set end date to 3 months from start when start changes (new project only)
+  private endDateEffect = effect(() => {
+    const start = this.startDate();
+    if (start && !this.isEdit() && !this.endDate()) {
+      const d = new Date(start);
+      d.setMonth(d.getMonth() + 3);
+      this.endDate.set(d.toISOString().split('T')[0]);
+    }
+  });
+
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {

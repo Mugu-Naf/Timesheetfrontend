@@ -88,12 +88,8 @@
 
             @if (auth.isAdmin()) {
               <div class="project-card__actions">
-                <a
-                  [routerLink]="['/projects/edit', p.projectId]"
-                  class="btn-edit"
-                >
-                  ✏️ Edit
-                </a>
+                <a [routerLink]="['/projects/edit', p.projectId]" class="btn-edit">✏️ Edit</a>
+                <button class="btn-members" (click)="openMemberModal(p)">👥 Members</button>
               </div>
             }
 
@@ -104,3 +100,49 @@
     }
   }
 </div>
+
+<!-- Member Management Modal -->
+@if (memberModalProject()) {
+  <div class="modal-overlay" (click)="closeMemberModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h3>{{ memberModalProject()!.projectName }} — Members</h3>
+        <button class="modal__close" (click)="closeMemberModal()">✕</button>
+      </div>
+
+      @if (auth.isAdmin()) {
+        <div class="modal__add-row">
+          <select class="form-input" [value]="selectedEmpId()"
+            (change)="selectedEmpId.set(+$any($event.target).value || null)">
+            <option [value]="null">— Select employee to add —</option>
+            @for (e of availableEmployees(); track e.employeeId) {
+              <option [value]="e.employeeId">{{ e.firstName }} {{ e.lastName }}</option>
+            }
+          </select>
+          <button class="btn-primary" (click)="addMember()" [disabled]="!selectedEmpId()">Add</button>
+        </div>
+      }
+
+      @if (memberLoading()) {
+        <p class="modal__loading">Loading...</p>
+      } @else if (members().length === 0) {
+        <p class="modal__empty">No members assigned yet.</p>
+      } @else {
+        <div class="member-list">
+          @for (m of members(); track m.projectMemberId) {
+            <div class="member-row">
+              <div class="member-avatar">{{ m.employeeName[0] }}</div>
+              <div class="member-info">
+                <span class="member-name">{{ m.employeeName }}</span>
+                <span class="member-dept">{{ m.department ?? '—' }}</span>
+              </div>
+              @if (auth.isAdmin()) {
+                <button class="btn-remove" (click)="removeMember(m.employeeId)">Remove</button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

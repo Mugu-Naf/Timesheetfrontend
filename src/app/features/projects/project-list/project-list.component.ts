@@ -3,10 +3,12 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProjectService } from '../../../core/services/project.service';
+import { EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { LoaderComponent } from '../../../shared/components/loader/loader.component';
 import { Project } from '../../../core/models/project.model';
+import { Employee } from '../../../core/models/employee.model';
 
 @Component({
   selector: 'app-project-list',
@@ -17,6 +19,7 @@ import { Project } from '../../../core/models/project.model';
 })
 export class ProjectListComponent implements OnInit {
   private projService  = inject(ProjectService);
+  private empService   = inject(EmployeeService);
   private toastService = inject(ToastService);
   protected auth       = inject(AuthService);
 
@@ -25,28 +28,26 @@ export class ProjectListComponent implements OnInit {
   filterActive = signal<string>('All');
   searchQuery  = signal('');
 
+  // Member management
+  memberModalProject = signal<Project | null>(null);
+  members            = signal<any[]>([]);
+  allEmployees       = signal<Employee[]>([]);
+  selectedEmpId      = signal<number | null>(null);
+  memberLoading      = signal(false);
+
   filtered = computed(() => {
     let list = this.projects();
-
-    if (this.filterActive() === 'Active')
-      list = list.filter(p => p.isActive);
-
-    if (this.filterActive() === 'Inactive')
-      list = list.filter(p => !p.isActive);
-
+    if (this.filterActive() === 'Active')   list = list.filter(p => p.isActive);
+    if (this.filterActive() === 'Inactive') list = list.filter(p => !p.isActive);
     const q = this.searchQuery().toLowerCase();
-    if (q)
-      list = list.filter(p =>
-        p.projectName.toLowerCase().includes(q) ||
-        (p.clientName ?? '').toLowerCase().includes(q)
-      );
-
+    if (q) list = list.filter(p =>
+      p.projectName.toLowerCase().includes(q) ||
+      (p.clientName ?? '').toLowerCase().includes(q)
+    );
     return list;
   });
 
-  ngOnInit() {
-    this.load();
-  }
+  ngOnInit() { this.load(); }
 
   load() {
     this.loading.set(true);
@@ -55,5 +56,53 @@ export class ProjectListComponent implements OnInit {
       error: () => { this.loading.set(false); this.toastService.error('Failed to load projects.'); }
     });
   }
+
+  openMemberModal(project: Project) {
+    this.memberModalProject.set(project);
+    this.selectedEmpId.set(null);
+    this.memberLoading.set(true);
+    this.projService.getMembers(project.projectId).subscribe({
+      next: m => { this.members.set(m); this.memberLoading.set(false); },
+      error: () => this.memberLoading.set(false)
+    });
+    this.empService.getAll().subscribe({
+      next: e => this.allEmployees.set(e),
+      error: () => {}
+    });
+  }
+
+  closeMemberModal() { this.memberModalProject.set(null); }
+
+  addMember() {
+    const empId = this.selectedEmpId();
+    const proj  = this.memberModalProject();
+    if (!empId || !proj) return;
+    this.projService.addMember(proj.projectId, empId).subscribe({
+      next: () => {
+        this.toastService.success('Employee added to project.');
+        this.openMemberModal(proj);
+        this.selectedEmpId.set(null);
+      },
+      error: err => this.toastService.error(err?.error?.message ?? 'Failed to add member.')
+    });
+  }
+
+  removeMember(employeeId: number) {
+    const proj = this.memberModalProject();
+    if (!proj) return;
+    this.projService.removeMember(proj.projectId, employeeId).subscribe({
+      next: () => {
+        this.toastService.success('Employee removed.');
+        this.members.update(list => list.filter(m => m.employeeId !== employeeId));
+      },
+      error: () => this.toastService.error('Failed to remove member.')
+    });
+  }
+
+  // Employees not yet in the project
+  availableEmployees = computed(() => {
+    const memberIds = new Set(this.members().map(m => m.employeeId));
+    return this.allEmployees().filter(e => !memberIds.has(e.employeeId));
+  });
 }
 ``

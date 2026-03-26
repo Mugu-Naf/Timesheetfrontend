@@ -121,4 +121,14 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
     const m = Math.floor((ms % 3600000) / 60000);
     return `${h}h ${m}m`;
   }
+
+  // Format time string — backend stores IST directly, just extract HH:mm
+  formatTime(timeStr: string | undefined | null): string {
+    if (!timeStr) return '—';
+    // If it's a full ISO string, extract time part directly (already IST from backend)
+    const t = new Date(timeStr);
+    const h = t.getHours().toString().padStart(2, '0');
+    const m = t.getMinutes().toString().padStart(2, '0');
+    return `${h}:${m}`;
+  }
 }

@@ -1,9 +1,11 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { AuthService } from '../../core/services/auth.service';
+import { EmployeeService } from '../../core/services/employee.service';
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard/employee': 'My Dashboard',
@@ -30,8 +32,10 @@ const PAGE_TITLES: Record<string, string> = {
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.css']
 })
-export class MainLayoutComponent {
+export class MainLayoutComponent implements OnInit {
   private router = inject(Router);
+  private auth   = inject(AuthService);
+  private empSvc = inject(EmployeeService);
 
   sidebarCollapsed = signal(false);
   mobileSidebarOpen = signal(false);
@@ -42,10 +46,18 @@ export class MainLayoutComponent {
       const title = PAGE_TITLES[e.urlAfterRedirects] ?? 'TimeSheet Pro';
       this.pageTitle.set(title);
     });
-
-    // Set initial title
     const current = PAGE_TITLES[this.router.url] ?? 'TimeSheet Pro';
     this.pageTitle.set(current);
+  }
+
+  ngOnInit() {
+    // Load real name on every app load so displayName is always up to date
+    if (this.auth.isLoggedIn() && !this.auth.firstName()) {
+      this.empSvc.getMyProfile().subscribe({
+        next: emp => this.auth.updateDisplayName(emp.firstName, emp.lastName),
+        error: () => {}
+      });
+    }
   }
 
   toggleSidebar() {

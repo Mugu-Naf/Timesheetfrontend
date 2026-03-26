@@ -14,6 +14,7 @@ export interface Timesheet {
   submittedAt: string;
   reviewedBy?: string;
   reviewedAt?: string;
+  isWeekend?: boolean;
 }
 
 export interface TimesheetCreateRequest {

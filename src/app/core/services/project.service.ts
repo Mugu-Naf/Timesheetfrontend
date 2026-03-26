@@ -39,5 +39,17 @@ export class ProjectService {
   getActive() {
     return this.http.get<Project[]>(`${this.api}/active`);
   }
+
+  getMembers(projectId: number) {
+    return this.http.get<any[]>(`${this.api}/${projectId}/members`);
+  }
+
+  addMember(projectId: number, employeeId: number) {
+    return this.http.post(`${this.api}/${projectId}/members`, { employeeId });
+  }
+
+  removeMember(projectId: number, employeeId: number) {
+    return this.http.delete(`${this.api}/${projectId}/members/${employeeId}`);
+  }
 }
 ``

@@ -50,10 +50,17 @@
             </thead>
             <tbody>
               @for (ts of filtered(); track ts.timesheetId) {
-                <tr>
-                  <td><strong>{{ ts.date | date:'dd MMM yyyy' }}</strong></td>
+                <tr [class.row--weekend]="ts.isWeekend">
+                  <td>
+                    <strong>{{ ts.date | date:'dd MMM yyyy' }}</strong>
+                    @if (ts.isWeekend) { <span class="weekend-tag">Weekend</span> }
+                  </td>
                   <td><span class="hours-badge">{{ ts.hoursWorked }}h</span></td>
-                  <td>{{ ts.overtimeHours > 0 ? ts.overtimeHours + 'h' : '—' }}</td>
+                  <td>
+                    @if (ts.overtimeHours > 0) {
+                      <span [class.ot-weekend]="ts.isWeekend">{{ ts.overtimeHours }}h{{ ts.isWeekend ? ' (2x)' : '' }}</span>
+                    } @else { — }
+                  </td>
                   <td>{{ ts.projectName ?? '—' }}</td>
                   <td><app-status-badge [status]="ts.status" /></td>
                   <td>{{ ts.submittedAt | date:'dd MMM' }}</td>
