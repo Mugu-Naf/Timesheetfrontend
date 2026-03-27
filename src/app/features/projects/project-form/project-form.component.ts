@@ -33,6 +33,9 @@ export class ProjectFormComponent implements OnInit {
   editId      = signal<number | null>(null);
   formError   = signal('');
 
+  // Today for [min] on start date
+  today = new Date().toISOString().split('T')[0];
+
   private clearEffect = effect(() => {
     this.projectName(); this.startDate();
     this.formError.set('');

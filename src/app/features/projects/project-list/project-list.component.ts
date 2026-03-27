@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+﻿import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -104,5 +104,9 @@ export class ProjectListComponent implements OnInit {
     const memberIds = new Set(this.members().map(m => m.employeeId));
     return this.allEmployees().filter(e => !memberIds.has(e.employeeId));
   });
+
+  isClosed(project: Project): boolean {
+    if (!project.endDate) return false;
+    return new Date(project.endDate) < new Date();
+  }
 }
-``

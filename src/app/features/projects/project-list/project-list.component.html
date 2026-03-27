@@ -52,19 +52,22 @@
 
       <div class="projects-grid">
         @for (p of filtered(); track p.projectId) {
-          <div class="project-card" [class.project-card--inactive]="!p.isActive">
+          <div class="project-card" [class.project-card--inactive]="!p.isActive" [class.project-card--closed]="isClosed(p)">
 
             <div class="project-card__header">
               <div class="project-icon">📁</div>
-
-              <span 
-                class="project-status"
-                [class.project-status--active]="p.isActive"
+              <span class="project-status"
+                [class.project-status--active]="p.isActive && !isClosed(p)"
                 [class.project-status--inactive]="!p.isActive"
-              >
-                {{ p.isActive ? 'Active' : 'Inactive' }}
+                [class.project-status--closed]="isClosed(p)">
+                {{ isClosed(p) ? 'Closed' : (p.isActive ? 'Active' : 'Inactive') }}
               </span>
             </div>
+
+            <!-- Closed banner -->
+            @if (isClosed(p)) {
+              <div class="closed-banner">🔒 PROJECT CLOSED</div>
+            }
 
             <h3 class="project-card__name">{{ p.projectName }}</h3>
 
@@ -78,7 +81,6 @@
 
             <div class="project-card__dates">
               <span>🗓️ {{ p.startDate | date:'dd MMM yyyy' }}</span>
-
               @if (p.endDate) {
                 <span>→ {{ p.endDate | date:'dd MMM yyyy' }}</span>
               } @else {
@@ -86,12 +88,17 @@
               }
             </div>
 
-            @if (auth.isAdmin()) {
-              <div class="project-card__actions">
+            <div class="project-card__actions">
+              @if (auth.isAdmin() && !isClosed(p)) {
                 <a [routerLink]="['/projects/edit', p.projectId]" class="btn-edit">✏️ Edit</a>
-                <button class="btn-members" (click)="openMemberModal(p)">👥 Members</button>
-              </div>
-            }
+              }
+              <!-- HR and Admin can view members on closed projects; Admin can manage on active -->
+              @if (auth.isAdminOrHR()) {
+                <button class="btn-members" [class.btn-members--view]="isClosed(p)" (click)="openMemberModal(p)">
+                  👥 {{ isClosed(p) ? 'View Members' : 'Members' }}
+                </button>
+              }
+            </div>
 
           </div>
         }
@@ -106,11 +113,17 @@
   <div class="modal-overlay" (click)="closeMemberModal()">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal__header">
-        <h3>{{ memberModalProject()!.projectName }} — Members</h3>
+        <div>
+          <h3>{{ memberModalProject()!.projectName }} — Members</h3>
+          @if (isClosed(memberModalProject()!)) {
+            <span class="modal__closed-tag">🔒 Project Closed</span>
+          }
+        </div>
         <button class="modal__close" (click)="closeMemberModal()">✕</button>
       </div>
 
-      @if (auth.isAdmin()) {
+      <!-- Add member row — only for Admin on active projects -->
+      @if (auth.isAdmin() && !isClosed(memberModalProject()!)) {
         <div class="modal__add-row">
           <select class="form-input" [value]="selectedEmpId()"
             (change)="selectedEmpId.set(+$any($event.target).value || null)">
@@ -126,7 +139,7 @@
       @if (memberLoading()) {
         <p class="modal__loading">Loading...</p>
       } @else if (members().length === 0) {
-        <p class="modal__empty">No members assigned yet.</p>
+        <p class="modal__empty">No members assigned to this project.</p>
       } @else {
         <div class="member-list">
           @for (m of members(); track m.projectMemberId) {
@@ -134,14 +147,18 @@
               <div class="member-avatar">{{ m.employeeName[0] }}</div>
               <div class="member-info">
                 <span class="member-name">{{ m.employeeName }}</span>
-                <span class="member-dept">{{ m.department ?? '—' }}</span>
+                <span class="member-dept">{{ m.department ?? '—' }} {{ m.jobTitle ? '· ' + m.jobTitle : '' }}</span>
               </div>
-              @if (auth.isAdmin()) {
+              <!-- Remove only for Admin on active projects -->
+              @if (auth.isAdmin() && !isClosed(memberModalProject()!)) {
                 <button class="btn-remove" (click)="removeMember(m.employeeId)">Remove</button>
               }
             </div>
           }
         </div>
+        @if (isClosed(memberModalProject()!)) {
+          <p class="modal__summary">{{ members().length }} employee(s) worked on this project.</p>
+        }
       }
     </div>
   </div>

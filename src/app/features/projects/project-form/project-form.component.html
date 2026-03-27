@@ -43,14 +43,16 @@
             <label class="form-label">Start Date <span class="required">*</span></label>
             <div class="input-wrapper">
               <span class="input-icon">📅</span>
-              <input type="date" class="form-input" [(ngModel)]="startDate" name="startDate" />
+              <input type="date" class="form-input" [(ngModel)]="startDate" name="startDate"
+                [min]="isEdit() ? '' : today" />
             </div>
           </div>
           <div class="form-group">
             <label class="form-label">End Date <span class="hint">(optional)</span></label>
             <div class="input-wrapper">
               <span class="input-icon">📅</span>
-              <input type="date" class="form-input" [(ngModel)]="endDate" name="endDate" />
+              <input type="date" class="form-input" [(ngModel)]="endDate" name="endDate"
+                [min]="startDate() || today" />
             </div>
             <span class="form-hint">Leave blank for ongoing projects</span>
           </div>

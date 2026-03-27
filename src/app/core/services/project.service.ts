@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+﻿import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Project, ProjectCreateRequest, ProjectUpdateRequest } from '../models/project.model';
@@ -7,35 +7,35 @@ import { Project, ProjectCreateRequest, ProjectUpdateRequest } from '../models/p
 export class ProjectService {
   private http = inject(HttpClient);
 
-  // ✅ FIXED — backend uses /Project (singular, capital P)
-  // ✅ environment already contains /api
+  // âœ… FIXED â€” backend uses /Project (singular, capital P)
+  // âœ… environment already contains /api
   private api  = `${environment.apiUrl}/Project`;
 
   readonly projects = signal<Project[]>([]);
   readonly loading  = signal(false);
   readonly error    = signal<string | null>(null);
 
-  // ✅ GET /api/Project
+  // âœ… GET /api/Project
   getAll() {
     return this.http.get<Project[]>(this.api);
   }
 
-  // ✅ GET /api/Project/{id}
+  // âœ… GET /api/Project/{id}
   getById(id: number) {
     return this.http.get<Project>(`${this.api}/${id}`);
   }
 
-  // ✅ POST /api/Project
+  // âœ… POST /api/Project
   create(data: ProjectCreateRequest) {
     return this.http.post<Project>(this.api, data);
   }
 
-  // ✅ PUT /api/Project/{id}
+  // âœ… PUT /api/Project/{id}
   update(id: number, data: ProjectUpdateRequest) {
     return this.http.put<Project>(`${this.api}/${id}`, data);
   }
 
-  // ✅ GET /api/Project/active
+  // âœ… GET /api/Project/active
   getActive() {
     return this.http.get<Project[]>(`${this.api}/active`);
   }
@@ -52,4 +52,3 @@ export class ProjectService {
     return this.http.delete(`${this.api}/${projectId}/members/${employeeId}`);
   }
 }
-``
