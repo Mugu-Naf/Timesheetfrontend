@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
-// Direct imports (NO lazy loading)
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
@@ -37,12 +36,10 @@ import { AuditLogsComponent } from './features/audit-logs/audit-logs.component';
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
-  // ✅ AUTH
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
 
-  // ✅ DASHBOARD (Layout + children)
   {
     path: 'dashboard',
     component: MainLayoutComponent,
@@ -64,7 +61,6 @@ export const routes: Routes = [
     ]
   },
 
-  // ✅ TIMESHEET
   {
     path: 'timesheet',
     component: MainLayoutComponent,
@@ -82,7 +78,6 @@ export const routes: Routes = [
     ]
   },
 
-  // ✅ LEAVE
   {
     path: 'leave',
     component: MainLayoutComponent,
@@ -99,7 +94,6 @@ export const routes: Routes = [
     ]
   },
 
-  // ✅ ATTENDANCE
   {
     path: 'attendance',
     component: MainLayoutComponent,
@@ -115,7 +109,6 @@ export const routes: Routes = [
     ]
   },
 
-  // ✅ PROJECTS
   {
     path: 'projects',
     component: MainLayoutComponent,
@@ -137,7 +130,6 @@ export const routes: Routes = [
     ]
   },
 
-  // ✅ EMPLOYEES
   {
     path: 'employees',
     component: MainLayoutComponent,
@@ -159,7 +151,6 @@ export const routes: Routes = [
     ]
   },
 
-  // ✅ OVERTIME
   {
     path: 'overtime',
     component: MainLayoutComponent,
@@ -169,8 +160,6 @@ export const routes: Routes = [
       { path: '', component: OvertimeRulesComponent }
     ]
   },
-
-  // ✅ AUDIT LOGS
   {
     path: 'audit-logs',
     component: MainLayoutComponent,
