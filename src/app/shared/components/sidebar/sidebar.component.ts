@@ -93,7 +93,7 @@ export class SidebarComponent {
     {
       label: 'Audit Logs', icon: '📋',
       route: '/audit-logs',
-      roles: ['Admin']
+      roles: ['Admin', 'HR']
     }
   ];
 

@@ -164,7 +164,7 @@ export const routes: Routes = [
     path: 'audit-logs',
     component: MainLayoutComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['Admin'] },
+    data: { roles: ['Admin', 'HR'] },
     children: [
       { path: '', component: AuditLogsComponent }
     ]
