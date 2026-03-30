@@ -39,7 +39,7 @@
         }
 
         <div class="form-group">
-          <label class="form-label">Project <span class="form-hint--inline">(optional)</span></label>
+          <label class="form-label">Project</label>
           <div class="input-wrapper">
             <span class="input-icon">📁</span>
             <select class="form-input form-select" [(ngModel)]="projectId" name="projectId">
@@ -52,7 +52,7 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Comments <span class="form-hint--inline">(optional)</span></label>
+          <label class="form-label">Comments</label>
           <textarea class="form-textarea" placeholder="Describe the work done today..."
             rows="4" [(ngModel)]="comments" name="comments" maxlength="500"></textarea>
           <span class="form-hint">{{ comments().length }}/500</span>

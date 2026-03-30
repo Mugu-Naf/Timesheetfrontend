@@ -58,7 +58,12 @@
                   <td><span class="hours-badge">{{ ts.hoursWorked }}h</span></td>
                   <td>
                     @if (ts.overtimeHours > 0) {
-                      <span [class.ot-weekend]="ts.isWeekend">{{ ts.overtimeHours }}h{{ ts.isWeekend ? ' (2x)' : '' }}</span>
+                      <span [class.ot-weekend]="ts.isWeekend">
+                        {{ ts.overtimeHours }}h
+                        @if (ts.overtimeMultiplier && ts.overtimeMultiplier > 1) {
+                          <span class="multiplier-tag">×{{ ts.overtimeMultiplier }}</span>
+                        }
+                      </span>
                     } @else { — }
                   </td>
                   <td>{{ ts.projectName ?? '—' }}</td>
