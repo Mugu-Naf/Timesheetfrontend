@@ -123,6 +123,10 @@ export class EmployeeProfileComponent implements OnInit {
         this.saving.set(false);
         this.editing.set(false);
         this.toastService.success('Profile updated successfully!');
+        // Update navbar/sidebar display name immediately
+        if (this.isOwnProfile()) {
+          this.auth.updateDisplayName(updated.firstName, updated.lastName);
+        }
       },
       error: (err: HttpErrorResponse) => {
         this.saving.set(false);
