@@ -29,8 +29,12 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
   });
 
   todaySessions = computed(() => {
-    const todayStr = this.currentTime().toDateString();
-    return this.attendance().filter(a => new Date(a.date).toDateString() === todayStr);
+    // Compare using date string yyyy-MM-dd to avoid timezone issues
+    const todayKey = this.currentTime().toLocaleDateString('en-CA'); // gives yyyy-MM-dd
+    return this.attendance().filter(a => {
+      const recKey = a.date.split('T')[0]; // take just the date part
+      return recKey === todayKey;
+    });
   });
 
   openSession = computed(() =>
@@ -55,10 +59,11 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
   });
 
   forgotCheckout = computed(() => {
-    const todayStr = this.currentTime().toDateString();
-    return this.attendance().find(a =>
-      new Date(a.date).toDateString() !== todayStr && a.checkInTime && !a.checkOutTime
-    ) ?? null;
+    const todayKey = this.currentTime().toLocaleDateString('en-CA');
+    return this.attendance().find(a => {
+      const recKey = a.date.split('T')[0];
+      return recKey !== todayKey && a.checkInTime && !a.checkOutTime;
+    }) ?? null;
   });
 
   totalPresent = computed(() => {
@@ -74,11 +79,8 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
 
   // Group attendance records by date for history display
   groupedHistory = computed(() => {
-    const todayStr = this.currentTime().toDateString();
-    // Only past days (not today — today is shown in the card above)
-    const past = this.attendance().filter(
-      a => new Date(a.date).toDateString() !== todayStr
-    );
+    const todayKey = this.currentTime().toLocaleDateString('en-CA');
+    const past = this.attendance().filter(a => a.date.split('T')[0] !== todayKey);
 
     // Group by date string
     const map = new Map<string, Attendance[]>();
@@ -126,9 +128,11 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
         );
         this.attendance.set(sorted);
         this.loading.set(false);
+        this.actionLoading.set(false); // always reset action loading after sync
       },
       error: () => {
         this.loading.set(false);
+        this.actionLoading.set(false);
         this.toastService.error("Failed to load attendance.");
       }
     });
@@ -138,18 +142,20 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
     this.actionLoading.set(true);
     this.attService.checkIn({ checkInTime: new Date().toISOString() }).subscribe({
       next: (rec: Attendance) => {
-        this.attendance.update(list => [rec, ...list.filter(a => a.attendanceId !== rec.attendanceId)]);
+        this.load(); // reload to sync with DB
         this.actionLoading.set(false);
         this.toastService.success("Checked in successfully!");
       },
       error: (err: any) => {
         this.actionLoading.set(false);
-        // Clean message — remove any "employee XXXX" or "on YYYY-MM-DD" raw IDs
         const raw: string = err?.error?.message ?? '';
-        const msg = raw.includes('already recorded')
-          ? 'Attendance already recorded for today. Please check out first.'
-          : raw || 'Check-in failed.';
-        this.toastService.error(msg);
+        if (raw.toLowerCase().includes('already checked in') || raw.toLowerCase().includes('already recorded')) {
+          // Reload so the open session appears and Check Out button shows
+          this.load();
+          this.toastService.warning('You already have an open session. Please check out first.');
+        } else {
+          this.toastService.error(raw || 'Check-in failed.');
+        }
       }
     });
   }
@@ -157,14 +163,16 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
   checkOut() {
     this.actionLoading.set(true);
     this.attService.checkOut({ checkOutTime: new Date().toISOString() }).subscribe({
-      next: (rec: Attendance) => {
-        this.attendance.update(list => list.map(a => a.attendanceId === rec.attendanceId ? rec : a));
+      next: () => {
+        // Reload all attendance to get accurate state from DB
+        this.load();
         this.actionLoading.set(false);
         this.toastService.success("Checked out successfully!");
       },
       error: (err: any) => {
         this.actionLoading.set(false);
         this.toastService.error(err?.error?.message ?? "Check-out failed.");
+        this.load(); // sync UI even on error
       }
     });
   }
