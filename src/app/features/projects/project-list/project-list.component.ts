@@ -1,7 +1,9 @@
-﻿import { Component, inject, signal, computed, OnInit } from '@angular/core';
+﻿import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { ProjectService } from '../../../core/services/project.service';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -17,7 +19,7 @@ import { Employee } from '../../../core/models/employee.model';
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.css']
 })
-export class ProjectListComponent implements OnInit {
+export class ProjectListComponent implements OnInit, OnDestroy {
   private projService  = inject(ProjectService);
   private empService   = inject(EmployeeService);
   private toastService = inject(ToastService);
@@ -27,6 +29,12 @@ export class ProjectListComponent implements OnInit {
   projects     = signal<Project[]>([]);
   filterActive = signal<string>('All');
   searchQuery  = signal('');
+
+  // Change 4 — filter options defined in TS, not inline in HTML
+  filterOptions = ['All', 'Active', 'Inactive'];
+
+  // Change 3 — debounce subject for search input
+  private searchInput$ = new Subject<string>();
 
   // Member management
   memberModalProject = signal<Project | null>(null);
@@ -47,7 +55,17 @@ export class ProjectListComponent implements OnInit {
     return list;
   });
 
-  ngOnInit() { this.load(); }
+  ngOnInit() {
+    this.load();
+    // Change 3 — debounce: wait 300ms after user stops typing
+    this.searchInput$
+      .pipe(debounceTime(300))
+      .subscribe(value => this.searchQuery.set(value));
+  }
+
+  ngOnDestroy() {
+    this.searchInput$.complete();
+  }
 
   load() {
     this.loading.set(true);
@@ -108,5 +126,17 @@ export class ProjectListComponent implements OnInit {
   isClosed(project: Project): boolean {
     if (!project.endDate) return false;
     return new Date(project.endDate) < new Date();
+  }
+
+  // Change 1 — type-safe search handler (removes $any())
+  onSearch(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchInput$.next(value);
+  }
+
+  // Change 2 — type-safe employee select handler (removes $any())
+  onEmployeeSelect(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.selectedEmpId.set(+value || null);
   }
 }

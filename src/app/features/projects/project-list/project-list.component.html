@@ -17,12 +17,12 @@
         class="search-input"
         placeholder="Search project or client..."
         [value]="searchQuery()"
-        (input)="searchQuery.set($any($event.target).value)"
+        (input)="onSearch($event)"
       />
     </div>
 
     <div class="filter-tabs">
-      @for (f of ['All','Active','Inactive']; track f) {
+      @for (f of filterOptions; track f) {
         <button
           class="filter-tab"
           [class.filter-tab--active]="filterActive() === f"
@@ -126,7 +126,7 @@
       @if (auth.isAdmin() && !isClosed(memberModalProject()!)) {
         <div class="modal__add-row">
           <select class="form-input" [value]="selectedEmpId()"
-            (change)="selectedEmpId.set(+$any($event.target).value || null)">
+            (change)="onEmployeeSelect($event)">
             <option [value]="null">— Select employee to add —</option>
             @for (e of availableEmployees(); track e.employeeId) {
               <option [value]="e.employeeId">{{ e.firstName }} {{ e.lastName }}</option>
@@ -151,7 +151,9 @@
               </div>
               <!-- Remove only for Admin on active projects -->
               @if (auth.isAdmin() && !isClosed(memberModalProject()!)) {
-                <button class="btn-remove" (click)="removeMember(m.employeeId)">Remove</button>
+                <button class="btn-remove"
+                  [title]="'Remove ' + m.employeeName"
+                  (click)="removeMember(m.employeeId)">Remove</button>
               }
             </div>
           }
