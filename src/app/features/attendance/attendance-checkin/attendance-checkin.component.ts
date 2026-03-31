@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular
 import { CommonModule, DatePipe } from '@angular/common';
 import { AttendanceService } from '../../../core/services/attendance.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { LoaderComponent } from '../../../shared/components/loader/loader.component';
 import { Attendance } from '../../../core/models/attendance.model';
@@ -16,6 +17,7 @@ import { Attendance } from '../../../core/models/attendance.model';
 export class AttendanceCheckinComponent implements OnInit, OnDestroy {
   private attService   = inject(AttendanceService);
   private toastService = inject(ToastService);
+  protected auth       = inject(AuthService);
 
   loading       = signal(true);
   actionLoading = signal(false);
@@ -168,3 +170,14 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
     return `${h}:${m}`;
   }
 }
+
+  // HR: fix a forgotten checkout on any attendance record
+  fixCheckout(attendanceId: number) {
+    this.attService.fixCheckout(attendanceId).subscribe({
+      next: updated => {
+        this.attendance.update(list => list.map(a => a.attendanceId === attendanceId ? updated : a));
+        this.toastService.success('Checkout fixed successfully.');
+      },
+      error: err => this.toastService.error(err?.error?.message ?? 'Failed to fix checkout.')
+    });
+  }

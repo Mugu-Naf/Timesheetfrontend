@@ -17,8 +17,15 @@
         <span class="reminder-banner__icon">⚠️</span>
         <div class="reminder-banner__text">
           <strong>You forgot to check out!</strong>
-          <span>You checked in on {{ forgotCheckout()!.date | date:'EEE, dd MMM yyyy' }} but never checked out. Please contact HR.</span>
+          <span>You checked in on {{ forgotCheckout()!.date | date:'EEE, dd MMM yyyy' }} but never checked out.
+            @if (!auth.isAdminOrHR()) { Please contact HR. }
+          </span>
         </div>
+        @if (auth.isAdminOrHR()) {
+          <button class="btn-fix-checkout" (click)="fixCheckout(forgotCheckout()!.attendanceId)">
+            🔧 Fix Checkout
+          </button>
+        }
       </div>
     }
 
@@ -146,6 +153,9 @@
                       {{ formatTime(rec.checkOutTime) }}
                     } @else if ((rec.date | date:'yyyy-MM-dd') !== (currentTime() | date:'yyyy-MM-dd')) {
                       <span class="missing-checkout">⚠️ Missing</span>
+                      @if (auth.isAdminOrHR()) {
+                        <button class="btn-fix-sm" (click)="fixCheckout(rec.attendanceId)">Fix</button>
+                      }
                     } @else {
                       <span class="active-session">Active</span>
                     }

@@ -46,4 +46,8 @@ export class AttendanceService {
       `${this.api}/report/${employeeId}?fromDate=${fromDate}&toDate=${toDate}`
     );
   }
+
+  fixCheckout(attendanceId: number, checkOutTime?: string) {
+    return this.http.put<Attendance>(`${this.api}/${attendanceId}/fix-checkout`, { checkOutTime });
+  }
 }

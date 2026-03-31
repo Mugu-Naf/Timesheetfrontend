@@ -97,3 +97,8 @@
 .total-hours-row { display: flex; justify-content: space-between; padding: 0.4rem 0.75rem; font-size: 0.875rem; color: #374151; border-top: 1px solid #e5e7eb; margin-top: 0.25rem; }
 .total-hours-row strong { color: #6366f1; }
 .active-session { color: #10b981; font-size: 0.75rem; font-weight: 600; }
+
+.btn-fix-checkout { margin-left: auto; padding: 0.4rem 0.875rem; background: #fff; border: 1.5px solid #f59e0b; color: #92400e; border-radius: 8px; font-size: 0.8125rem; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.btn-fix-checkout:hover { background: #fef3c7; }
+.btn-fix-sm { margin-left: 0.5rem; padding: 0.15rem 0.5rem; background: #fef3c7; border: 1px solid #fde68a; color: #92400e; border-radius: 5px; font-size: 0.72rem; font-weight: 600; cursor: pointer; }
+.btn-fix-sm:hover { background: #fde68a; }
