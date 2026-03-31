@@ -119,8 +119,8 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() { clearInterval(this.clockInterval); }
 
-  load() {
-    this.loading.set(true);
+  load(silent = false) {
+    if (!silent) this.loading.set(true);
     this.attService.getMyAttendance().subscribe({
       next: att => {
         const sorted = [...att].sort((a, b) =>
@@ -128,7 +128,7 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
         );
         this.attendance.set(sorted);
         this.loading.set(false);
-        this.actionLoading.set(false); // always reset action loading after sync
+        this.actionLoading.set(false);
       },
       error: () => {
         this.loading.set(false);
@@ -142,16 +142,14 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
     this.actionLoading.set(true);
     this.attService.checkIn({ checkInTime: new Date().toISOString() }).subscribe({
       next: (rec: Attendance) => {
-        this.load(); // reload to sync with DB
-        this.actionLoading.set(false);
+        this.load(true); // silent reload — no full-page spinner
         this.toastService.success("Checked in successfully!");
       },
       error: (err: any) => {
         this.actionLoading.set(false);
         const raw: string = err?.error?.message ?? '';
         if (raw.toLowerCase().includes('already checked in') || raw.toLowerCase().includes('already recorded')) {
-          // Reload so the open session appears and Check Out button shows
-          this.load();
+          this.load(true); // silent reload — shows Check Out button without hiding UI
           this.toastService.warning('You already have an open session. Please check out first.');
         } else {
           this.toastService.error(raw || 'Check-in failed.');
@@ -164,15 +162,13 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
     this.actionLoading.set(true);
     this.attService.checkOut({ checkOutTime: new Date().toISOString() }).subscribe({
       next: () => {
-        // Reload all attendance to get accurate state from DB
-        this.load();
-        this.actionLoading.set(false);
+        this.load(true); // silent reload
         this.toastService.success("Checked out successfully!");
       },
       error: (err: any) => {
         this.actionLoading.set(false);
         this.toastService.error(err?.error?.message ?? "Check-out failed.");
-        this.load(); // sync UI even on error
+        this.load(true);
       }
     });
   }
