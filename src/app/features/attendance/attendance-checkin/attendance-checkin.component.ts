@@ -176,9 +176,7 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
   fixCheckout(attendanceId: number) {
     this.attService.fixCheckout(attendanceId).subscribe({
       next: (updated: Attendance) => {
-        this.attendance.update((list: Attendance[]) =>
-          list.map(a => a.attendanceId === attendanceId ? updated : a)
-        );
+        this.load(true); // silent reload to sync all sessions
         this.toastService.success("Checkout fixed successfully.");
       },
       error: (err: any) => this.toastService.error(err?.error?.message ?? "Failed to fix checkout.")
