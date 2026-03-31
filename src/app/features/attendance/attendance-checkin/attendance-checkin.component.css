@@ -102,3 +102,19 @@
 .btn-fix-checkout:hover { background: #fef3c7; }
 .btn-fix-sm { margin-left: 0.5rem; padding: 0.15rem 0.5rem; background: #fef3c7; border: 1px solid #fde68a; color: #92400e; border-radius: 5px; font-size: 0.72rem; font-weight: 600; cursor: pointer; }
 .btn-fix-sm:hover { background: #fde68a; }
+
+/* Grouped history */
+.history-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.history-day { background: #fff; border: 1px solid #e8eaed; border-radius: 12px; overflow: hidden; }
+.history-day--warning { border-color: #fde68a; }
+.history-day__header { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: #fafafa; border-bottom: 1px solid #f3f4f6; flex-wrap: wrap; gap: 0.5rem; }
+.history-day__date { font-size: 0.875rem; font-weight: 600; color: #111827; }
+.history-day__summary { display: flex; align-items: center; gap: 0.75rem; }
+.history-day__total { font-size: 0.8125rem; font-weight: 600; color: #6366f1; }
+.history-day__sessions { display: flex; flex-direction: column; gap: 0; }
+.history-session { display: flex; align-items: center; gap: 1rem; padding: 0.5rem 1rem; border-bottom: 1px solid #f9fafb; font-size: 0.8125rem; color: #374151; flex-wrap: wrap; }
+.history-session:last-child { border-bottom: none; }
+.history-session__num { font-weight: 600; color: #6366f1; min-width: 64px; }
+.history-session__time { color: #374151; }
+.history-session__time strong { color: #111827; }
+.history-session__dur { margin-left: auto; font-weight: 600; color: #111827; }

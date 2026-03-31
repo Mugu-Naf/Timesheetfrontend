@@ -72,6 +72,42 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
   totalLeave  = computed(() => this.attendance().filter(a => a.status === "Leave").length);
   totalAbsent = computed(() => this.attendance().filter(a => a.status === "Absent").length);
 
+  // Group attendance records by date for history display
+  groupedHistory = computed(() => {
+    const todayStr = this.currentTime().toDateString();
+    // Only past days (not today — today is shown in the card above)
+    const past = this.attendance().filter(
+      a => new Date(a.date).toDateString() !== todayStr
+    );
+
+    // Group by date string
+    const map = new Map<string, Attendance[]>();
+    for (const rec of past) {
+      const key = rec.date.split('T')[0];
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(rec);
+    }
+
+    // Convert to sorted array (newest first)
+    return Array.from(map.entries())
+      .sort((a, b) => b[0].localeCompare(a[0]))
+      .map(([dateKey, sessions]) => {
+        const totalMs = sessions
+          .filter(s => s.checkInTime && s.checkOutTime)
+          .reduce((sum, s) => sum + (new Date(s.checkOutTime!).getTime() - new Date(s.checkInTime!).getTime()), 0);
+        const totalH = Math.floor(totalMs / 3600000);
+        const totalM = Math.floor((totalMs % 3600000) / 60000);
+        const hasOpen = sessions.some(s => s.checkInTime && !s.checkOutTime);
+        return {
+          date: sessions[0].date,
+          sessions,
+          totalStr: totalMs > 0 ? `${totalH}h ${totalM}m` : '—',
+          status: sessions[sessions.length - 1].status,
+          hasOpen
+        };
+      });
+  });
+
   private clockInterval?: ReturnType<typeof setInterval>;
 
   ngOnInit() {
@@ -108,7 +144,12 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
       },
       error: (err: any) => {
         this.actionLoading.set(false);
-        this.toastService.error(err?.error?.message ?? "Check-in failed.");
+        // Clean message — remove any "employee XXXX" or "on YYYY-MM-DD" raw IDs
+        const raw: string = err?.error?.message ?? '';
+        const msg = raw.includes('already recorded')
+          ? 'Attendance already recorded for today. Please check out first.'
+          : raw || 'Check-in failed.';
+        this.toastService.error(msg);
       }
     });
   }

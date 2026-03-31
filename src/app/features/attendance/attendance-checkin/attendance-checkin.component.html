@@ -121,56 +121,55 @@
     <!-- History table -->
     <div class="section-title-row">
       <h3 class="section-title">Attendance History</h3>
-      <span class="record-count">{{ attendance().length }} records</span>
+      <span class="record-count">{{ groupedHistory().length }} day(s)</span>
     </div>
 
-    @if (attendance().length === 0) {
+    @if (groupedHistory().length === 0) {
       <div class="empty-state">
         <div class="empty-state__icon">📅</div>
         <h3>No attendance records</h3>
         <p>Your check-in history will appear here.</p>
       </div>
     } @else {
-      <div class="table-card">
-        <div class="table-wrapper">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Check In</th>
-                <th>Check Out</th>
-                <th>Duration</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (rec of attendance(); track rec.attendanceId) {
-                <tr [class.row--warning]="rec.checkInTime && !rec.checkOutTime && (rec.date | date:'yyyy-MM-dd') !== (currentTime() | date:'yyyy-MM-dd')">
-                  <td><strong>{{ rec.date | date:'EEE, dd MMM yyyy' }}</strong></td>
-                  <td>{{ formatTime(rec.checkInTime) }}</td>
-                  <td>
-                    @if (rec.checkOutTime) {
-                      {{ formatTime(rec.checkOutTime) }}
-                    } @else if ((rec.date | date:'yyyy-MM-dd') !== (currentTime() | date:'yyyy-MM-dd')) {
-                      <span class="missing-checkout">⚠️ Missing</span>
-                      @if (auth.isAdminOrHR()) {
-                        <button class="btn-fix-sm" (click)="fixCheckout(rec.attendanceId)">Fix</button>
-                      }
+      <div class="history-list">
+        @for (day of groupedHistory(); track day.date) {
+          <div class="history-day" [class.history-day--warning]="day.hasOpen">
+            <!-- Day header -->
+            <div class="history-day__header">
+              <strong class="history-day__date">{{ day.date | date:'EEE, dd MMM yyyy' }}</strong>
+              <div class="history-day__summary">
+                <span class="history-day__total">Total: {{ day.totalStr }}</span>
+                <app-status-badge [status]="day.status" />
+                @if (day.hasOpen && auth.isAdminOrHR()) {
+                  <button class="btn-fix-sm" (click)="fixCheckout(day.sessions[0].attendanceId)">Fix</button>
+                }
+              </div>
+            </div>
+
+            <!-- Sessions for this day -->
+            <div class="history-day__sessions">
+              @for (s of day.sessions; track s.attendanceId; let i = $index) {
+                <div class="history-session">
+                  <span class="history-session__num">Session {{ i + 1 }}</span>
+                  <span class="history-session__time">
+                    In: <strong>{{ formatTime(s.checkInTime) }}</strong>
+                  </span>
+                  <span class="history-session__time">
+                    Out:
+                    @if (s.checkOutTime) {
+                      <strong>{{ formatTime(s.checkOutTime) }}</strong>
                     } @else {
-                      <span class="active-session">Active</span>
+                      <span class="missing-checkout">⚠️ Missing</span>
                     }
-                  </td>
-                  <td>
-                    @if (rec.checkInTime && rec.checkOutTime) {
-                      {{ getDurationStr(rec.checkInTime, rec.checkOutTime) }}
-                    } @else { — }
-                  </td>
-                  <td><app-status-badge [status]="rec.status" /></td>
-                </tr>
+                  </span>
+                  @if (s.checkInTime && s.checkOutTime) {
+                    <span class="history-session__dur">{{ getDurationStr(s.checkInTime, s.checkOutTime) }}</span>
+                  }
+                </div>
               }
-            </tbody>
-          </table>
-        </div>
+            </div>
+          </div>
+        }
       </div>
     }
   }
