@@ -26,28 +26,56 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
 
-  // Computed so it always reflects the current day (even past midnight)
-  todayRecord = computed(() => {
+  // All sessions for today
+  todaySessions = computed(() => {
     const todayStr = this.currentTime().toDateString();
-    return this.attendance().find(a => new Date(a.date).toDateString() === todayStr) ?? null;
+    return this.attendance().filter(a => new Date(a.date).toDateString() === todayStr);
   });
 
-  isCheckedIn  = computed(() => !!this.todayRecord()?.checkInTime);
-  isCheckedOut = computed(() => !!this.todayRecord()?.checkOutTime);
+  // The currently open session (checked in, not yet checked out)
+  openSession = computed(() =>
+    this.todaySessions().find(a => a.checkInTime && !a.checkOutTime) ?? null
+  );
 
-  // Detect if there's a previous day record with check-in but no check-out
+  // True if there's an active open session right now
+  isCheckedIn = computed(() => !!this.openSession());
+
+  // Total hours across all completed sessions today
+  totalHoursToday = computed(() => {
+    return this.todaySessions()
+      .filter(a => a.checkInTime && a.checkOutTime)
+      .reduce((sum, a) => {
+        const ms = new Date(a.checkOutTime!).getTime() - new Date(a.checkInTime!).getTime();
+        return sum + ms / 3600000;
+      }, 0);
+  });
+
+  // Today's status from the latest session
+  todayStatus = computed(() => {
+    const sessions = this.todaySessions();
+    if (sessions.length === 0) return null;
+    return sessions[sessions.length - 1].status;
+  });
+
+  // Detect forgot checkout from a previous day
   forgotCheckout = computed(() => {
     const todayStr = this.currentTime().toDateString();
-    return this.attendance().find(a => {
-      return new Date(a.date).toDateString() !== todayStr && a.checkInTime && !a.checkOutTime;
-    }) ?? null;
+    return this.attendance().find(a =>
+      new Date(a.date).toDateString() !== todayStr && a.checkInTime && !a.checkOutTime
+    ) ?? null;
   });
 
-  // Summary stats — based on actual check-in records
-  totalPresent  = computed(() => this.attendance().filter(a => a.checkInTime && a.status === 'Present').length);
-  totalHalfDay  = computed(() => this.attendance().filter(a => a.checkInTime && a.status === 'HalfDay').length);
-  totalLeave    = computed(() => this.attendance().filter(a => a.status === 'Leave').length);
-  totalAbsent   = computed(() => this.attendance().filter(a => a.status === 'Absent').length);
+  // Summary stats — count unique days
+  totalPresent = computed(() => {
+    const days = new Set(this.attendance().filter(a => a.status === 'Present').map(a => a.date.split('T')[0]));
+    return days.size;
+  });
+  totalHalfDay = computed(() => {
+    const days = new Set(this.attendance().filter(a => a.status === 'HalfDay').map(a => a.date.split('T')[0]));
+    return days.size;
+  });
+  totalLeave  = computed(() => this.attendance().filter(a => a.status === 'Leave').length);
+  totalAbsent = computed(() => this.attendance().filter(a => a.status === 'Absent').length);
 
   private clockInterval?: ReturnType<typeof setInterval>;
 
@@ -113,12 +141,20 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
   }
 
   getWorkDuration(): string {
-    const rec = this.todayRecord();
+    const rec = this.openSession();
     if (!rec?.checkInTime) return '—';
-    const end = rec.checkOutTime ? new Date(rec.checkOutTime) : new Date();
+    const end = new Date();
     const ms = end.getTime() - new Date(rec.checkInTime).getTime();
     const h = Math.floor(ms / 3600000);
     const m = Math.floor((ms % 3600000) / 60000);
+    return `${h}h ${m}m`;
+  }
+
+  getTotalHoursStr(): string {
+    const total = this.totalHoursToday();
+    if (total === 0) return '—';
+    const h = Math.floor(total);
+    const m = Math.round((total - h) * 60);
     return `${h}h ${m}m`;
   }
 

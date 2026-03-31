@@ -8,6 +8,8 @@ export interface Attendance {
   checkInTime?: string;
   checkOutTime?: string;
   status: AttendanceStatus;
+  totalHoursToday?: number;
+  sessionNumber?: number;
 }
 
 export interface AttendanceCheckInRequest {

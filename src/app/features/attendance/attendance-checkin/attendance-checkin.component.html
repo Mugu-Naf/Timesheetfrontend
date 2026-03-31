@@ -1,6 +1,5 @@
 <div class="page">
 
-  <!-- Header -->
   <div class="page-header">
     <div>
       <h2 class="page-title">My Attendance</h2>
@@ -12,13 +11,13 @@
 
   @if (!loading()) {
 
-    <!-- ⚠️ Forgot checkout reminder -->
+    <!-- Forgot checkout reminder -->
     @if (forgotCheckout()) {
       <div class="reminder-banner">
         <span class="reminder-banner__icon">⚠️</span>
         <div class="reminder-banner__text">
           <strong>You forgot to check out!</strong>
-          <span>You checked in on {{ forgotCheckout()!.date | date:'EEE, dd MMM yyyy' }} but never checked out. Please contact HR to fix this record.</span>
+          <span>You checked in on {{ forgotCheckout()!.date | date:'EEE, dd MMM yyyy' }} but never checked out. Please contact HR.</span>
         </div>
       </div>
     }
@@ -32,53 +31,58 @@
         </div>
 
         <div class="status-row">
-          @if (!isCheckedIn()) {
+          @if (forgotCheckout()) {
+            <span class="status-badge status-badge--idle">Fix Previous Checkout</span>
+          } @else if (!isCheckedIn() && todaySessions().length === 0) {
             <span class="status-badge status-badge--idle">Not Checked In</span>
-          } @else if (!isCheckedOut()) {
+          } @else if (isCheckedIn()) {
             <span class="status-badge status-badge--in">Currently Working</span>
           } @else {
-            <span class="status-badge status-badge--done">Shift Complete</span>
+            <span class="status-badge status-badge--done">
+              {{ todayStatus() === 'Present' ? 'Full Day' : 'Half Day' }}
+            </span>
           }
         </div>
 
-        @if (todayRecord()) {
-          <div class="time-row">
-            <div class="time-item">
-              <span class="time-item__label">Check In</span>
-              <span class="time-item__value">{{ formatTime(todayRecord()!.checkInTime) }}</span>
-            </div>
-            <span class="time-arrow">→</span>
-            <div class="time-item">
-              <span class="time-item__label">Check Out</span>
-              <span class="time-item__value">
-                {{ todayRecord()!.checkOutTime ? formatTime(todayRecord()!.checkOutTime) : '—' }}
-              </span>
-            </div>
-            <span class="time-sep">|</span>
-            <div class="time-item">
-              <span class="time-item__label">Duration</span>
-              <span class="time-item__value time-item__value--green">{{ getWorkDuration() }}</span>
-            </div>
+        <!-- Today's sessions summary -->
+        @if (todaySessions().length > 0) {
+          <div class="sessions-list">
+            @for (s of todaySessions(); track s.attendanceId; let i = $index) {
+              <div class="session-row">
+                <span class="session-num">Session {{ i + 1 }}</span>
+                <span class="session-in">In: {{ formatTime(s.checkInTime) }}</span>
+                @if (s.checkOutTime) {
+                  <span class="session-out">Out: {{ formatTime(s.checkOutTime) }}</span>
+                  <span class="session-dur">{{ getDurationStr(s.checkInTime!, s.checkOutTime!) }}</span>
+                } @else {
+                  <span class="session-out session-out--active">Active {{ getWorkDuration() }}</span>
+                }
+              </div>
+            }
+            @if (totalHoursToday() > 0) {
+              <div class="total-hours-row">
+                <span>Total today:</span>
+                <strong>{{ getTotalHoursStr() }}</strong>
+              </div>
+            }
           </div>
         }
       </div>
 
       <div class="checkin-card__right">
-        <!-- Show warning if forgot checkout — disable check-in -->
         @if (forgotCheckout()) {
           <div class="blocked-badge">🚫 Fix previous checkout first</div>
         } @else if (!isCheckedIn()) {
+          <!-- Show Check-in whether it's first session or after a checkout -->
           <button class="btn-checkin" (click)="checkIn()" [disabled]="actionLoading()">
             @if (actionLoading()) { <span class="spinner-btn"></span> } @else { ✅ }
-            Check In
+            {{ todaySessions().length > 0 ? 'Check In Again' : 'Check In' }}
           </button>
-        } @else if (!isCheckedOut()) {
+        } @else {
           <button class="btn-checkout" (click)="checkOut()" [disabled]="actionLoading()">
             @if (actionLoading()) { <span class="spinner-btn"></span> } @else { 🚪 }
             Check Out
           </button>
-        } @else {
-          <div class="done-badge">✅ Shift complete for today</div>
         }
       </div>
     </div>
@@ -107,7 +111,7 @@
       </div>
     </div>
 
-    <!-- Full history table -->
+    <!-- History table -->
     <div class="section-title-row">
       <h3 class="section-title">Attendance History</h3>
       <span class="record-count">{{ attendance().length }} records</span>
@@ -136,14 +140,14 @@
               @for (rec of attendance(); track rec.attendanceId) {
                 <tr [class.row--warning]="rec.checkInTime && !rec.checkOutTime && (rec.date | date:'yyyy-MM-dd') !== (currentTime() | date:'yyyy-MM-dd')">
                   <td><strong>{{ rec.date | date:'EEE, dd MMM yyyy' }}</strong></td>
-                  <td>{{ rec.checkInTime ? formatTime(rec.checkInTime) : '—' }}</td>
+                  <td>{{ formatTime(rec.checkInTime) }}</td>
                   <td>
                     @if (rec.checkOutTime) {
                       {{ formatTime(rec.checkOutTime) }}
                     } @else if ((rec.date | date:'yyyy-MM-dd') !== (currentTime() | date:'yyyy-MM-dd')) {
                       <span class="missing-checkout">⚠️ Missing</span>
                     } @else {
-                      —
+                      <span class="active-session">Active</span>
                     }
                   </td>
                   <td>
