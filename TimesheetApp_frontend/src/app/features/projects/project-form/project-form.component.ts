@@ -36,6 +36,14 @@ export class ProjectFormComponent implements OnInit {
   // Today for [min] on start date
   today = new Date().toISOString().split('T')[0];
 
+  // Max end date = start date + 3 months (or today + 3 months if no start)
+  get maxEndDate(): string {
+    const base = this.startDate() || this.today;
+    const d = new Date(base);
+    d.setMonth(d.getMonth() + 3);
+    return d.toISOString().split('T')[0];
+  }
+
   private clearEffect = effect(() => {
     this.projectName(); this.startDate();
     this.formError.set('');
@@ -44,7 +52,7 @@ export class ProjectFormComponent implements OnInit {
   // Auto-set end date to 3 months from start when start changes (new project only)
   private endDateEffect = effect(() => {
     const start = this.startDate();
-    if (start && !this.isEdit() && !this.endDate()) {
+    if (start && !this.isEdit()) {
       const d = new Date(start);
       d.setMonth(d.getMonth() + 3);
       this.endDate.set(d.toISOString().split('T')[0]);

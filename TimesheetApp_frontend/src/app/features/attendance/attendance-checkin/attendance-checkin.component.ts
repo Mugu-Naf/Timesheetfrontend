@@ -28,6 +28,11 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
     weekday: "long", year: "numeric", month: "long", day: "numeric"
   });
 
+  isWeekendToday = (() => {
+    const d = new Date().getDay();
+    return d === 0 || d === 6;
+  })();
+
   todaySessions = computed(() => {
     // Compare using date string yyyy-MM-dd to avoid timezone issues
     const todayKey = this.currentTime().toLocaleDateString('en-CA'); // gives yyyy-MM-dd
@@ -181,6 +186,11 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
       },
       error: (err: any) => this.toastService.error(err?.error?.message ?? "Failed to fix checkout.")
     });
+  }
+
+  isDateWeekend(dateStr: string): boolean {
+    const d = new Date(dateStr).getDay();
+    return d === 0 || d === 6;
   }
 
   getDurationStr(inStr: string, outStr: string): string {

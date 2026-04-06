@@ -58,15 +58,15 @@
               <div class="project-icon">📁</div>
               <span class="project-status"
                 [class.project-status--active]="p.isActive && !isClosed(p)"
-                [class.project-status--inactive]="!p.isActive"
+                [class.project-status--inactive]="!p.isActive && !isClosed(p)"
                 [class.project-status--closed]="isClosed(p)">
-                {{ isClosed(p) ? 'Closed' : (p.isActive ? 'Active' : 'Inactive') }}
+                {{ getProjectStatus(p) }}
               </span>
             </div>
 
             <!-- Closed banner -->
             @if (isClosed(p)) {
-              <div class="closed-banner">🔒 PROJECT CLOSED</div>
+              <div class="closed-banner">🔒 PROJECT EXPIRED / CLOSED</div>
             }
 
             <h3 class="project-card__name">{{ p.projectName }}</h3>
@@ -116,7 +116,7 @@
         <div>
           <h3>{{ memberModalProject()!.projectName }} — Members</h3>
           @if (isClosed(memberModalProject()!)) {
-            <span class="modal__closed-tag">🔒 Project Closed</span>
+            <span class="modal__closed-tag">🔒 Project Expired / Closed</span>
           }
         </div>
         <button class="modal__close" (click)="closeMemberModal()">✕</button>
@@ -159,7 +159,7 @@
           }
         </div>
         @if (isClosed(memberModalProject()!)) {
-          <p class="modal__summary">{{ members().length }} employee(s) worked on this project.</p>
+          <p class="modal__summary">{{ members().length }} employee(s) worked on this project during its active period.</p>
         }
       }
     </div>

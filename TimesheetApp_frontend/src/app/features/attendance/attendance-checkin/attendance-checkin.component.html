@@ -11,6 +11,18 @@
 
   @if (!loading()) {
 
+    <!-- Weekend double-pay banner -->
+    @if (isWeekendToday) {
+      <div class="weekend-banner">
+        <span class="weekend-banner__icon">🎉</span>
+        <div class="weekend-banner__text">
+          <strong>Weekend Work — Double Pay Day!</strong>
+          <span>Working today qualifies you for 2× salary for this day as per company policy.</span>
+        </div>
+        <span class="weekend-badge">2× Pay</span>
+      </div>
+    }
+
     <!-- Forgot checkout reminder -->
     @if (forgotCheckout()) {
       <div class="reminder-banner">
@@ -132,7 +144,12 @@
           <div class="history-day" [class.history-day--warning]="day.hasOpen">
             <!-- Day header -->
             <div class="history-day__header">
-              <strong class="history-day__date">{{ day.date | date:'EEE, dd MMM yyyy' }}</strong>
+              <strong class="history-day__date">
+                {{ day.date | date:'EEE, dd MMM yyyy' }}
+                @if (isDateWeekend(day.date)) {
+                  <span class="weekend-tag">🌟 Weekend · 2× Pay</span>
+                }
+              </strong>
               <div class="history-day__summary">
                 <span class="history-day__total">Total: {{ day.totalStr }}</span>
                 <app-status-badge [status]="day.status" />
