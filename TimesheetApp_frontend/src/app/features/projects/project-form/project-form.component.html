@@ -46,17 +46,32 @@
               <input type="date" class="form-input" [(ngModel)]="startDate" name="startDate"
                 [min]="isEdit() ? '' : today" />
             </div>
+            @if (!isEdit()) {
+              <span class="form-hint">Cannot select a past date</span>
+            }
           </div>
           <div class="form-group">
             <label class="form-label">End Date <span class="hint">(optional)</span></label>
             <div class="input-wrapper">
               <span class="input-icon">📅</span>
               <input type="date" class="form-input" [(ngModel)]="endDate" name="endDate"
-                [min]="startDate() || today" />
+                [min]="startDate() || today"
+                [max]="isEdit() ? '' : maxEndDate" />
             </div>
-            <span class="form-hint">Leave blank for ongoing projects</span>
+            @if (!isEdit()) {
+              <span class="form-hint">Auto-set to 3 months from start · max 3 months ahead</span>
+            } @else {
+              <span class="form-hint">Leave blank for ongoing projects</span>
+            }
           </div>
         </div>
+
+        @if (!isEdit()) {
+          <div class="info-note">
+            <span>ℹ️</span>
+            <span>Projects run for a <strong>3-month period</strong>. After the end date, the project will be marked as <strong>Expired / Closed</strong> and members can still be viewed.</span>
+          </div>
+        }
 
         @if (isEdit()) {
           <div class="toggle-group">

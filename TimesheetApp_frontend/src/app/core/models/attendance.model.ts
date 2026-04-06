@@ -10,6 +10,8 @@ export interface Attendance {
   status: AttendanceStatus;
   totalHoursToday?: number;
   sessionNumber?: number;
+  isWeekend?: boolean;
+  weekendMultiplier?: number;
 }
 
 export interface AttendanceCheckInRequest {

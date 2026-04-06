@@ -118,3 +118,13 @@
 .history-session__time { color: #374151; }
 .history-session__time strong { color: #111827; }
 .history-session__dur { margin-left: auto; font-weight: 600; color: #111827; }
+
+/* Weekend double-pay banner */
+.weekend-banner { display: flex; align-items: center; gap: 0.75rem; background: linear-gradient(135deg, #fef9c3, #fef3c7); border: 1.5px solid #fde68a; border-radius: 14px; padding: 1rem 1.25rem; }
+.weekend-banner__icon { font-size: 1.5rem; flex-shrink: 0; }
+.weekend-banner__text { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.875rem; color: #78350f; }
+.weekend-banner__text strong { color: #92400e; font-weight: 700; font-size: 0.9375rem; }
+.weekend-badge { background: #f59e0b; color: #fff; font-size: 0.8125rem; font-weight: 700; padding: 0.35rem 0.875rem; border-radius: 980px; white-space: nowrap; flex-shrink: 0; letter-spacing: 0.03em; }
+
+/* Weekend tag in history */
+.weekend-tag { display: inline-block; margin-left: 0.5rem; font-size: 0.7rem; font-weight: 600; color: #92400e; background: #fef3c7; border: 1px solid #fde68a; padding: 0.1rem 0.5rem; border-radius: 980px; vertical-align: middle; }

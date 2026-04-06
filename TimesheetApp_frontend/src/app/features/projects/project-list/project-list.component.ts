@@ -31,7 +31,7 @@ export class ProjectListComponent implements OnInit, OnDestroy {
   searchQuery  = signal('');
 
   // Change 4 — filter options defined in TS, not inline in HTML
-  filterOptions = ['All', 'Active', 'Inactive'];
+  filterOptions = ['All', 'Active', 'Inactive', 'Expired'];
 
   // Change 3 — debounce subject for search input
   private searchInput$ = new Subject<string>();
@@ -45,8 +45,9 @@ export class ProjectListComponent implements OnInit, OnDestroy {
 
   filtered = computed(() => {
     let list = this.projects();
-    if (this.filterActive() === 'Active')   list = list.filter(p => p.isActive);
-    if (this.filterActive() === 'Inactive') list = list.filter(p => !p.isActive);
+    if (this.filterActive() === 'Active')   list = list.filter(p => p.isActive && !this.isClosed(p));
+    if (this.filterActive() === 'Inactive') list = list.filter(p => !p.isActive && !this.isClosed(p));
+    if (this.filterActive() === 'Expired')  list = list.filter(p => this.isClosed(p));
     const q = this.searchQuery().toLowerCase();
     if (q) list = list.filter(p =>
       p.projectName.toLowerCase().includes(q) ||
@@ -126,6 +127,12 @@ export class ProjectListComponent implements OnInit, OnDestroy {
   isClosed(project: Project): boolean {
     if (!project.endDate) return false;
     return new Date(project.endDate) < new Date();
+  }
+
+  getProjectStatus(project: Project): string {
+    if (this.isClosed(project)) return 'Expired';
+    if (project.isActive) return 'Active';
+    return 'Inactive';
   }
 
   // Change 1 — type-safe search handler (removes $any())
