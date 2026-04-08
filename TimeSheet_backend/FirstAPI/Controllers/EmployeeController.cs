@@ -3,7 +3,6 @@ using FirstAPI.Interfaces;
 using FirstAPI.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TimeSheetApp.Models.DTOs;
 
 namespace FirstAPI.Controllers
 {
@@ -22,7 +21,7 @@ namespace FirstAPI.Controllers
         }
 
         private string GetUsername() => User.FindFirst(ClaimTypes.Name)?.Value ?? "unknown";
-        private string GetIp() => HttpContext.Connection.RemoteIpAddress?.ToString();
+        private string? GetIp() => HttpContext.Connection.RemoteIpAddress?.ToString();
 
         [HttpGet("profile")]
         [Authorize(Roles = "Employee,HR,Admin")]
@@ -43,7 +42,7 @@ namespace FirstAPI.Controllers
 
         [HttpGet]
         [Authorize(Roles = "HR,Admin")]
-        public async Task<ActionResult<IEnumerable<EmployeeProfileDto>>> GetAll([FromQuery] GetAllEmployeesRequestDTO dto)
+        public async Task<ActionResult<IEnumerable<EmployeeProfileDto>>> GetAll()
         {
             var result = await _employeeService.GetAllEmployees();
             return Ok(result);

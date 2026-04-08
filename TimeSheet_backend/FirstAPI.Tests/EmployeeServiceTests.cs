@@ -32,7 +32,6 @@ namespace FirstAPI.Tests
 
             _service = new EmployeeService(
                 _employeeRepoMock.Object,
-                _context,
                 _mapper);
         }
 

@@ -17,7 +17,7 @@ namespace FirstAPI.Controllers
             _auditLog    = auditLog;
         }
 
-        private string GetIp() => HttpContext.Connection.RemoteIpAddress?.ToString();
+        private string? GetIp() => HttpContext.Connection.RemoteIpAddress?.ToString();
 
         [HttpPost("register")]
         public async Task<ActionResult<LoginResponseDto>> Register([FromBody] RegisterRequestDto request)

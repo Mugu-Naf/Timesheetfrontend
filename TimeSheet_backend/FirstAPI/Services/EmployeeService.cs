@@ -1,5 +1,4 @@
 using AutoMapper;
-using FirstAPI.Contexts;
 using FirstAPI.Exceptions;
 using FirstAPI.Interfaces;
 using FirstAPI.Models;
@@ -15,7 +14,6 @@ namespace FirstAPI.Services
 
         public EmployeeService(
             IRepository<int, Employee> employeeRepository,
-            TimeSheetContext context,
             IMapper mapper)
         {
             _employeeRepository = employeeRepository;

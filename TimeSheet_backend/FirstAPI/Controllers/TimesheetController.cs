@@ -25,7 +25,7 @@ namespace FirstAPI.Controllers
         }
 
         private string GetUsername() => User.FindFirst(ClaimTypes.Name)?.Value ?? "unknown";
-        private string GetIp() => HttpContext.Connection.RemoteIpAddress?.ToString();
+        private string? GetIp() => HttpContext.Connection.RemoteIpAddress?.ToString();
 
         [HttpPost]
         [Authorize(Roles = "Employee,HR,Admin")]
