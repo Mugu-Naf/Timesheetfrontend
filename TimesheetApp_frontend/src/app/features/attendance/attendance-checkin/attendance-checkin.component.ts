@@ -101,11 +101,17 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
   // Group attendance records by date for history display
   groupedHistory = computed(() => {
     const todayKey = this.currentTime().toLocaleDateString('en-CA');
-    const past = this.attendance().filter(a => a.date.split('T')[0] !== todayKey);
+    const hasOpenToday = this.todaySessions().some(s => s.checkInTime && !s.checkOutTime);
+
+    // Exclude today only if there's still an open session (it's shown in the live card)
+    // Once all sessions are closed, today also appears in history
+    const records = hasOpenToday
+      ? this.attendance().filter(a => a.date.split('T')[0] !== todayKey)
+      : this.attendance();
 
     // Group by date string
     const map = new Map<string, Attendance[]>();
-    for (const rec of past) {
+    for (const rec of records) {
       const key = rec.date.split('T')[0];
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(rec);
