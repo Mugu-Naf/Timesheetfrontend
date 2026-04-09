@@ -53,7 +53,7 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
       .filter(a => a.checkInTime && a.checkOutTime)
       .reduce((sum, a) => {
         const ms = new Date(a.checkOutTime!).getTime() - new Date(a.checkInTime!).getTime();
-        return sum + ms / 3600000;
+        return sum + (ms > 0 ? ms / 3600000 : 0);
       }, 0);
   });
 
@@ -101,7 +101,10 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
       .map(([dateKey, sessions]) => {
         const totalMs = sessions
           .filter(s => s.checkInTime && s.checkOutTime)
-          .reduce((sum, s) => sum + (new Date(s.checkOutTime!).getTime() - new Date(s.checkInTime!).getTime()), 0);
+          .reduce((sum, s) => {
+            const diff = new Date(s.checkOutTime!).getTime() - new Date(s.checkInTime!).getTime();
+            return sum + (diff > 0 ? diff : 0);
+          }, 0);
         const totalH = Math.floor(totalMs / 3600000);
         const totalM = Math.floor((totalMs % 3600000) / 60000);
         const hasOpen = sessions.some(s => s.checkInTime && !s.checkOutTime);
@@ -195,6 +198,7 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
 
   getDurationStr(inStr: string, outStr: string): string {
     const ms = new Date(outStr).getTime() - new Date(inStr).getTime();
+    if (ms <= 0) return '—';
     const h = Math.floor(ms / 3600000);
     const m = Math.floor((ms % 3600000) / 60000);
     return `${h}h ${m}m`;

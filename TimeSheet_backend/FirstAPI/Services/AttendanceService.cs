@@ -25,14 +25,13 @@ namespace FirstAPI.Services
 
         public async Task<AttendanceResponseDto> CheckIn(int employeeId, AttendanceCheckInDto dto)
         {
-            var istOffset = TimeSpan.FromHours(5.5);
-            var nowIst    = DateTime.UtcNow.Add(istOffset);
-            var todayIst  = nowIst.Date;
+            var nowUtc   = DateTime.UtcNow;
+            var todayUtc = nowUtc.Date;
 
             // Block if there's an open check-in from a previous day (forgot to check out)
             var openPrevious = await _attendanceRepository.GetQueryable()
                 .FirstOrDefaultAsync(a => a.EmployeeId == employeeId
-                    && a.Date.Date < todayIst
+                    && a.Date.Date < todayUtc
                     && a.CheckInTime != null
                     && a.CheckOutTime == null);
 
@@ -42,17 +41,17 @@ namespace FirstAPI.Services
             // Allow multiple sessions: only block if there's an OPEN (no checkout) session today
             var openToday = await _attendanceRepository.GetQueryable()
                 .FirstOrDefaultAsync(a => a.EmployeeId == employeeId
-                    && a.Date.Date == todayIst
+                    && a.Date.Date == todayUtc
                     && a.CheckOutTime == null);
 
             if (openToday != null)
                 throw new Exceptions.ValidationException("You are already checked in. Please check out first.");
 
-            var checkIn = new DateTime(nowIst.Year, nowIst.Month, nowIst.Day, nowIst.Hour, nowIst.Minute, 0);
+            var checkIn = new DateTime(nowUtc.Year, nowUtc.Month, nowUtc.Day, nowUtc.Hour, nowUtc.Minute, 0, DateTimeKind.Utc);
             var attendance = new Attendance
             {
                 EmployeeId  = employeeId,
-                Date        = todayIst,
+                Date        = todayUtc,
                 CheckInTime = checkIn,
                 Status      = AttendanceStatus.Present
             };
@@ -63,25 +62,24 @@ namespace FirstAPI.Services
 
         public async Task<AttendanceResponseDto> CheckOut(int employeeId, AttendanceCheckOutDto dto)
         {
-            var istOffset = TimeSpan.FromHours(5.5);
-            var nowIst    = DateTime.UtcNow.Add(istOffset);
-            var todayIst  = nowIst.Date;
+            var nowUtc   = DateTime.UtcNow;
+            var todayUtc = nowUtc.Date;
 
             // Find the open session (no checkout yet) for today
             var attendance = await _attendanceRepository.GetQueryable()
                 .FirstOrDefaultAsync(a => a.EmployeeId == employeeId
-                    && a.Date.Date == todayIst
+                    && a.Date.Date == todayUtc
                     && a.CheckOutTime == null);
 
             if (attendance == null)
                 throw new EntityNotFoundException("No active check-in found for today. Please check in first.");
 
-            var checkOut = new DateTime(nowIst.Year, nowIst.Month, nowIst.Day, nowIst.Hour, nowIst.Minute, 0);
+            var checkOut = new DateTime(nowUtc.Year, nowUtc.Month, nowUtc.Day, nowUtc.Hour, nowUtc.Minute, 0, DateTimeKind.Utc);
             attendance.CheckOutTime = checkOut;
 
             // Calculate total hours across ALL completed sessions today
             var allTodaySessions = await _attendanceRepository.GetQueryable()
-                .Where(a => a.EmployeeId == employeeId && a.Date.Date == todayIst && a.CheckOutTime != null)
+                .Where(a => a.EmployeeId == employeeId && a.Date.Date == todayUtc && a.CheckOutTime != null)
                 .ToListAsync();
 
             double totalHours = allTodaySessions
@@ -100,7 +98,7 @@ namespace FirstAPI.Services
 
             // Update all today's records to reflect the same status
             var allToday = await _attendanceRepository.GetQueryable()
-                .Where(a => a.EmployeeId == employeeId && a.Date.Date == todayIst)
+                .Where(a => a.EmployeeId == employeeId && a.Date.Date == todayUtc)
                 .ToListAsync();
             foreach (var rec in allToday)
             {
@@ -183,9 +181,9 @@ namespace FirstAPI.Services
 
             var istOffset = TimeSpan.FromHours(5.5);
             var nowIst    = DateTime.UtcNow.Add(istOffset);
-            var rawCheckOut = dto.CheckOutTime ?? nowIst;
+            var rawCheckOut = dto.CheckOutTime ?? DateTime.UtcNow;
             attendance.CheckOutTime = new DateTime(rawCheckOut.Year, rawCheckOut.Month, rawCheckOut.Day,
-                                                   rawCheckOut.Hour, rawCheckOut.Minute, 0);
+                                                   rawCheckOut.Hour, rawCheckOut.Minute, 0, DateTimeKind.Utc);
 
             // Recalculate total hours for that day
             var allSessions = await _attendanceRepository.GetQueryable()
