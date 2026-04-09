@@ -57,7 +57,8 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
     return this.todaySessions()
       .filter(a => a.checkInTime && a.checkOutTime)
       .reduce((sum, a) => {
-        const ms = new Date(a.checkOutTime!).getTime() - new Date(a.checkInTime!).getTime();
+        const ms = new Date(a.checkOutTime!.replace('Z', '')).getTime()
+                 - new Date(a.checkInTime!.replace('Z', '')).getTime();
         return sum + (ms > 0 ? ms / 3600000 : 0);
       }, 0);
   });
@@ -117,7 +118,8 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
         const totalMs = sessions
           .filter(s => s.checkInTime && s.checkOutTime)
           .reduce((sum, s) => {
-            const diff = new Date(s.checkOutTime!).getTime() - new Date(s.checkInTime!).getTime();
+            const diff = new Date(s.checkOutTime!.replace('Z', '')).getTime()
+                       - new Date(s.checkInTime!.replace('Z', '')).getTime();
             return sum + (diff > 0 ? diff : 0);
           }, 0);
         const totalH = Math.floor(totalMs / 3600000);
@@ -216,17 +218,18 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
   }
 
   getDurationStr(inStr: string, outStr: string): string {
-    const ms = new Date(outStr).getTime() - new Date(inStr).getTime();
-    if (ms <= 0) return '—';
-    const h = Math.floor(ms / 3600000);
-    const m = Math.floor((ms % 3600000) / 60000);
+    const diff = new Date(outStr.replace('Z', '')).getTime() - new Date(inStr.replace('Z', '')).getTime();
+    if (diff <= 0) return '—';
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
     return `${h}h ${m}m`;
   }
 
   getWorkDuration(): string {
     const rec = this.openSession();
     if (!rec?.checkInTime) return "0h 0m";
-    const ms = new Date().getTime() - new Date(rec.checkInTime).getTime();
+    const ms = this.currentTime().getTime() - new Date(rec.checkInTime.replace('Z', '')).getTime();
+    if (ms <= 0) return "0h 0m";
     const h = Math.floor(ms / 3600000);
     const m = Math.floor((ms % 3600000) / 60000);
     return `${h}h ${m}m`;
@@ -240,9 +243,12 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
     return `${h}h ${m}m`;
   }
 
+  // Times from backend are IST with no timezone suffix — parse as local, display as-is
   formatTime(timeStr: string | undefined | null): string {
     if (!timeStr) return "";
-    const t = new Date(timeStr);
+    // Strip any trailing Z to prevent UTC interpretation
+    const clean = timeStr.replace('Z', '');
+    const t = new Date(clean);
     const h = t.getHours().toString().padStart(2, "0");
     const m = t.getMinutes().toString().padStart(2, "0");
     return `${h}:${m}`;
