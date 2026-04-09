@@ -1,11 +1,14 @@
 ﻿import { Component, inject, signal, computed, OnInit, OnDestroy } from "@angular/core";
 import { CommonModule, DatePipe } from "@angular/common";
+import { forkJoin } from "rxjs";
 import { AttendanceService } from "../../../core/services/attendance.service";
+import { LeaveService } from "../../../core/services/leave.service";
 import { ToastService } from "../../../core/services/toast.service";
 import { AuthService } from "../../../core/services/auth.service";
 import { StatusBadgeComponent } from "../../../shared/components/status-badge/status-badge.component";
 import { LoaderComponent } from "../../../shared/components/loader/loader.component";
 import { Attendance } from "../../../core/models/attendance.model";
+import { LeaveRequest } from "../../../core/models/leave.model";
 
 @Component({
   selector: "app-attendance-checkin",
@@ -16,12 +19,14 @@ import { Attendance } from "../../../core/models/attendance.model";
 })
 export class AttendanceCheckinComponent implements OnInit, OnDestroy {
   private attService   = inject(AttendanceService);
+  private leaveService = inject(LeaveService);
   private toastService = inject(ToastService);
   protected auth       = inject(AuthService);
 
   loading       = signal(true);
   actionLoading = signal(false);
   attendance    = signal<Attendance[]>([]);
+  approvedLeaves = signal<LeaveRequest[]>([]);
   currentTime   = signal(new Date());
 
   todayStr = new Date().toLocaleDateString("en-IN", {
@@ -79,7 +84,17 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
     const days = new Set(this.attendance().filter(a => a.status === "HalfDay").map(a => a.date.split("T")[0]));
     return days.size;
   });
-  totalLeave  = computed(() => this.attendance().filter(a => a.status === "Leave").length);
+  totalLeave = computed(() => {
+    // Count calendar days covered by approved leave requests
+    return this.approvedLeaves()
+      .filter(l => l.status === 'Approved')
+      .reduce((sum, l) => {
+        const start = new Date(l.startDate);
+        const end   = new Date(l.endDate);
+        const days  = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
+        return sum + days;
+      }, 0);
+  });
   totalAbsent = computed(() => this.attendance().filter(a => a.status === "Absent").length);
 
   // Group attendance records by date for history display
@@ -129,12 +144,16 @@ export class AttendanceCheckinComponent implements OnInit, OnDestroy {
 
   load(silent = false) {
     if (!silent) this.loading.set(true);
-    this.attService.getMyAttendance().subscribe({
-      next: att => {
+    forkJoin({
+      att:    this.attService.getMyAttendance(),
+      leaves: this.leaveService.getMyLeaves()
+    }).subscribe({
+      next: ({ att, leaves }) => {
         const sorted = [...att].sort((a, b) =>
           new Date(b.date).getTime() - new Date(a.date).getTime()
         );
         this.attendance.set(sorted);
+        this.approvedLeaves.set(leaves.filter(l => l.status === 'Approved'));
         this.loading.set(false);
         this.actionLoading.set(false);
       },
