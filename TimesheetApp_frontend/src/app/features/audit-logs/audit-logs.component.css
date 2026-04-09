@@ -153,3 +153,23 @@
 @media (max-width: 768px) {
   .filter-row { grid-template-columns: 1fr 1fr; }
 }
+
+.page-ellipsis {
+  padding: 0.4rem 0.25rem;
+  color: #aeaeb2;
+  font-size: 0.8125rem;
+  user-select: none;
+}
+
+.pagesize-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.form-select--sm {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8125rem;
+  width: auto;
+}

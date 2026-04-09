@@ -22,7 +22,9 @@ export class AuditLogsComponent implements OnInit {
   totalCount = signal(0);
   totalPages = signal(0);
   page       = signal(1);
-  pageSize   = 50;
+  pageSize   = signal(10);
+
+  readonly pageSizeOptions = [10, 25, 50, 100];
 
   // Filter state
   filterUsername   = signal('');
@@ -52,7 +54,7 @@ export class AuditLogsComponent implements OnInit {
       fromDate:   this.filterFromDate()   || undefined,
       toDate:     this.filterToDate()     || undefined,
       page:       this.page(),
-      pageSize:   this.pageSize
+      pageSize:   this.pageSize()
     };
 
     this.auditService.getLogs(filter).subscribe({
@@ -70,6 +72,12 @@ export class AuditLogsComponent implements OnInit {
   }
 
   applyFilters() {
+    this.page.set(1);
+    this.load();
+  }
+
+  changePageSize(size: number) {
+    this.pageSize.set(size);
     this.page.set(1);
     this.load();
   }
@@ -116,10 +124,19 @@ export class AuditLogsComponent implements OnInit {
   get pages(): number[] {
     const total = this.totalPages();
     const cur   = this.page();
-    const range: number[] = [];
-    const start = Math.max(1, cur - 2);
-    const end   = Math.min(total, cur + 2);
-    for (let i = start; i <= end; i++) range.push(i);
-    return range;
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    const range = new Set<number>();
+    range.add(1);
+    range.add(total);
+    for (let i = Math.max(2, cur - 2); i <= Math.min(total - 1, cur + 2); i++) {
+      range.add(i);
+    }
+    return Array.from(range).sort((a, b) => a - b);
+  }
+
+  isEllipsis(pages: number[], idx: number): boolean {
+    return idx > 0 && pages[idx] - pages[idx - 1] > 1;
   }
 }

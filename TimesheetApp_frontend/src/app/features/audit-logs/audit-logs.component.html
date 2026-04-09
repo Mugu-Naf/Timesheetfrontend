@@ -61,6 +61,16 @@
     <div class="filter-actions">
       <button class="btn-primary" (click)="applyFilters()">🔍 Apply Filters</button>
       <button class="btn-secondary" (click)="clearFilters()">✕ Clear</button>
+      <div class="pagesize-group">
+        <label class="filter-label">Rows per page</label>
+        <select class="form-select form-select--sm"
+          [value]="pageSize()"
+          (change)="changePageSize(+$any($event.target).value)">
+          @for (s of pageSizeOptions; track s) {
+            <option [value]="s">{{ s }}</option>
+          }
+        </select>
+      </div>
     </div>
   </div>
 
@@ -124,17 +134,25 @@
       </div>
 
       <!-- Pagination -->
-      @if (totalPages() > 1) {
+      @if (totalCount() > 0) {
         <div class="pagination">
+          <button class="page-btn" [disabled]="page() === 1" (click)="goToPage(1)">«</button>
           <button class="page-btn" [disabled]="page() === 1" (click)="goToPage(page() - 1)">‹ Prev</button>
 
-          @for (p of pages; track p) {
+          @for (p of pages; track p; let i = $index) {
+            @if (isEllipsis(pages, i)) {
+              <span class="page-ellipsis">…</span>
+            }
             <button class="page-btn" [class.page-btn--active]="p === page()" (click)="goToPage(p)">{{ p }}</button>
           }
 
           <button class="page-btn" [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">Next ›</button>
+          <button class="page-btn" [disabled]="page() === totalPages()" (click)="goToPage(totalPages())">»</button>
 
-          <span class="page-info">Page {{ page() }} of {{ totalPages() }}</span>
+          <span class="page-info">
+            {{ (page() - 1) * pageSize() + 1 }}–{{ page() * pageSize() > totalCount() ? totalCount() : page() * pageSize() }}
+            of {{ totalCount() }} records
+          </span>
         </div>
       }
     }
